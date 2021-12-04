@@ -44,7 +44,7 @@ void printhelp() {
 	printscore(0);
 }
 
-void* printinput(void*) {
+void* printinput(void* args) {
 	int c;
 	system("/usr/bin/stty raw");
 	while ((c = getchar()) != 27) {
@@ -63,12 +63,13 @@ void* printinput(void*) {
 				break;
 		}
 	}
+	return NULL;
 }
 
 int main (int argc, char **argv)
 {
 	struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	ccount = w.ws_col;
 	lcount = w.ws_row;
 	colarr = malloc(sizeof(int) * ccount);
