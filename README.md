@@ -1,4 +1,4 @@
-# Termination
+# Terminations
 
 ## Compilation
 
