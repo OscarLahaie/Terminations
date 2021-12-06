@@ -168,7 +168,7 @@ void printhelp() {
 	isinmenu = false;
 }
 
-void* printinput(void*) {
+void* printinput(void* ptr) {
 	int c;
 	system("/usr/bin/stty raw");
 	while ((c = getchar()) != 'q') {
@@ -254,7 +254,7 @@ void generategrid() {
 	}
 }
 
-void* updatetimer(void*) {
+void* updatetimer(void* ptr) {
 	while (finished == false) {
 		sleep(1);
 		if (!isinmenu) {
