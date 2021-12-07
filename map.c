@@ -163,7 +163,7 @@ int classique (int map[50][50], int size) {
             }
         }
         
-     for (int i = 0; i < 1; i++) {
+     for (int i = 0; i < 3; i++) {
         for (int colonne = 0; colonne < size; colonne++){
             for (int ligne = 0; ligne < size; ligne++) {
                 if (map[colonne][ligne] > 10) {
@@ -354,14 +354,14 @@ int desert (int map[50][50], int size) {
     // Mise en place des cactus
     for (int colonne = 0; colonne < size; colonne++){
         for (int ligne = 0; ligne < size; ligne++) {
-            if (rand() % 200 < 1 && map[colonne][ligne] == 1)
+            if (rand() % 100 < 1 && map[colonne][ligne] == 1)
             {
             map[colonne][ligne] = 2;                
             }
         }
     }
     
-    // Fin des arbres
+    // Fin des cactus
 
 }
 
