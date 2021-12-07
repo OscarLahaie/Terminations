@@ -2,12 +2,15 @@
 #include <stdlib.h>
 #include <time.h>
 
-void afficher(int map[50][50], int size, int type) {
+#define height 60
+#define width 60
+
+void afficher(int map[height][width], int type) {
     if (type == 0) {
         printf("%d\n", map[0][0]);
         map[0][0] = 1; // Bug à regler le premier element est ici indéfini donc je le fixe le mettant en prairie
-        for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+        for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 // Couleur du fond
                 if (map[colonne][ligne] < 0) {
                     //Bleu foncé pour le fond de l'eau
@@ -44,8 +47,8 @@ void afficher(int map[50][50], int size, int type) {
     } else if (type == 1) {
         printf("%d\n", map[0][0]);
         map[0][0] = 1; // Bug à regler le premier element est ici indéfini donc je le fixe le mettant en glace
-        for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+        for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 // Couleur du fond
                 if (map[colonne][ligne] < 0) {
                     //Bleu foncé pour le fond de l'eau
@@ -79,8 +82,8 @@ void afficher(int map[50][50], int size, int type) {
     else if (type == 2) {
         printf("%d\n", map[0][0]);
         map[0][0] = 1; // Bug à regler le premier element est ici indéfini donc je le fixe le mettant en glace
-        for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+        for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 // Couleur du fond
                 if (map[colonne][ligne] < 0) {
                     //Bleu clair oasis
@@ -114,10 +117,10 @@ void afficher(int map[50][50], int size, int type) {
 }
 
 
-int classique (int map[50][50], int size) {
+int classique (int map[height][width]) {
     // Mise aléatoire de l'eau
-    for (int colonne = 0; colonne < size; colonne++){
-        for (int ligne = 0; ligne < size; ligne++) {
+    for (int colonne = 0; colonne < height; colonne++){
+        for (int ligne = 0; ligne < width; ligne++) {
             if (rand() % 1000 < 1)
             {
             map[colonne][ligne] = -1 * (rand() % 10);                
@@ -131,8 +134,8 @@ int classique (int map[50][50], int size) {
     //afficher(map, 50, map[0][0]);
     
     for (int i = 0; i < 5; i++) {
-        for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+        for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 if (map[colonne][ligne] < 0) {
                     if (colonne -1 >= 0 && map[colonne-1][ligne] == 1) {
                         map[colonne-1][ligne] = -1 * (rand() % map[colonne][ligne]);
@@ -154,8 +157,8 @@ int classique (int map[50][50], int size) {
 
     // Mise en place des montagnes
 
-    for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+    for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 if (rand() % 500 < 1 && map[colonne][ligne] == 1)
                 {
                 map[colonne][ligne] = 10 + rand() % 20;                
@@ -164,8 +167,8 @@ int classique (int map[50][50], int size) {
         }
         
      for (int i = 0; i < 3; i++) {
-        for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+        for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 if (map[colonne][ligne] > 10) {
                     if (colonne -1 >= 0 && map[colonne-1][ligne] == 1) {
                         map[colonne-1][ligne] = 10 + (rand() % (map[colonne][ligne]-10));
@@ -189,8 +192,8 @@ int classique (int map[50][50], int size) {
 
     // Mise en place des arbres
     
-    for (int colonne = 0; colonne < size; colonne++){
-        for (int ligne = 0; ligne < size; ligne++) {
+    for (int colonne = 0; colonne < height; colonne++){
+        for (int ligne = 0; ligne < width; ligne++) {
             if (rand() % 1000 < 1 && map[colonne][ligne] == 1)
             {
             map[colonne][ligne] = 1 + rand() % 5;                
@@ -198,8 +201,8 @@ int classique (int map[50][50], int size) {
         }
     }
      for (int i = 0; i < 3; i++) {
-        for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+        for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 if (map[colonne][ligne] > 1  && map[colonne][ligne] < 10) {
                     if (colonne -1 >= 0 && map[colonne-1][ligne] == 1) {
                         map[colonne-1][ligne] = 1 + (rand() % map[colonne][ligne]);
@@ -221,16 +224,16 @@ int classique (int map[50][50], int size) {
     //Fin de la mise en place des arbres
 
     //Harmonisation des reliefs
-    for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+    for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 if (map[colonne][ligne] < 10 && map[colonne][ligne] >= 2)
                 {
                 map[colonne][ligne] = 2;                
                 }
             }
         }
-    for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+    for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 if (map[colonne][ligne] >= 10)
                 {
                 map[colonne][ligne] -= 6;                
@@ -240,11 +243,11 @@ int classique (int map[50][50], int size) {
     return map;
 }
 
-int toundra (int map[50][50], int size) {
+int toundra (int map[height][width]) {
 
     // Mise en place de la glace
-    for (int colonne = 0; colonne < size; colonne++){
-        for (int ligne = 0; ligne < size; ligne++) {
+    for (int colonne = 0; colonne < height; colonne++){
+        for (int ligne = 0; ligne < width; ligne++) {
             if (rand() % 1000 < 1)
             {
             map[colonne][ligne] = -1 * (rand() % 10);                
@@ -258,8 +261,8 @@ int toundra (int map[50][50], int size) {
     //afficher(map, 50, map[0][0]);
     
     for (int i = 0; i < 5; i++) {
-        for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+        for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 if (map[colonne][ligne] < 0) {
                     if (colonne -1 >= 0 && map[colonne-1][ligne] == 1) {
                         map[colonne-1][ligne] = -1 * (rand() % map[colonne][ligne]);
@@ -280,8 +283,8 @@ int toundra (int map[50][50], int size) {
     // Fin de la glace
 
     // Mise en place des arbres 
-    for (int colonne = 0; colonne < size; colonne++){
-        for (int ligne = 0; ligne < size; ligne++) {
+    for (int colonne = 0; colonne < height; colonne++){
+        for (int ligne = 0; ligne < width; ligne++) {
             if (rand() % 1000 < 1 && map[colonne][ligne] == 1)
             {
             map[colonne][ligne] = 1 + rand() % 5;                
@@ -289,8 +292,8 @@ int toundra (int map[50][50], int size) {
         }
     }
      for (int i = 0; i < 3; i++) {
-        for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+        for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 if (map[colonne][ligne] > 1  && map[colonne][ligne] < 10) {
                     if (colonne -1 >= 0 && map[colonne-1][ligne] == 1) {
                         map[colonne-1][ligne] = 1 + (rand() % map[colonne][ligne]);
@@ -312,11 +315,11 @@ int toundra (int map[50][50], int size) {
 
 }
 
-int desert (int map[50][50], int size) {
+int desert (int map[height][width]) {
 
     // Mise en place des oasis
-    for (int colonne = 0; colonne < size; colonne++){
-        for (int ligne = 0; ligne < size; ligne++) {
+    for (int colonne = 0; colonne < height; colonne++){
+        for (int ligne = 0; ligne < width; ligne++) {
             if (rand() % 1000 < 1)
             {
             map[colonne][ligne] = -1 * (rand() % 10);                
@@ -330,8 +333,8 @@ int desert (int map[50][50], int size) {
     //afficher(map, 50, map[0][0]);
     
     for (int i = 0; i < 5; i++) {
-        for (int colonne = 0; colonne < size; colonne++){
-            for (int ligne = 0; ligne < size; ligne++) {
+        for (int colonne = 0; colonne < height; colonne++){
+            for (int ligne = 0; ligne < width; ligne++) {
                 if (map[colonne][ligne] < 0) {
                     if (colonne -1 >= 0 && map[colonne-1][ligne] == 1) {
                         map[colonne-1][ligne] = -1 * (rand() % map[colonne][ligne]);
@@ -352,8 +355,8 @@ int desert (int map[50][50], int size) {
     // Fin de oasis
 
     // Mise en place des cactus
-    for (int colonne = 0; colonne < size; colonne++){
-        for (int ligne = 0; ligne < size; ligne++) {
+    for (int colonne = 0; colonne < height; colonne++){
+        for (int ligne = 0; ligne < width; ligne++) {
             if (rand() % 100 < 1 && map[colonne][ligne] == 1)
             {
             map[colonne][ligne] = 2;                
@@ -367,15 +370,15 @@ int desert (int map[50][50], int size) {
 
 int main () {
     srand(time(NULL));
-    int map[50][50] = {0};
+    int map[height][width] = {0};
 
 
-    **map = classique(map, 50);
-    afficher(map, 50, 0);
+    **map = classique(map);
+    afficher(map, 0);
 
-    **map = toundra(map, 50);
-    afficher(map, 50, 1);
+    **map = toundra(map);
+    afficher(map, 1);
     
-    **map = desert(map, 50);
-    afficher(map, 50, 2);
+    **map = desert(map);
+    afficher(map, 2);
 }
