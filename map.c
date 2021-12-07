@@ -3,7 +3,7 @@
 #include <time.h>
 
 #define HEIGHT 60
-#define WIDTH 60
+#define WIDTH 40
 
 void afficher(int map[HEIGHT][WIDTH], int type)
 {
@@ -188,7 +188,7 @@ int classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= 50 && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -196,7 +196,7 @@ int classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= 50 && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -231,7 +231,7 @@ int classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = 10 + (rand() % (map[colonne][ligne] - 10));
                     }
-                    if (colonne + 1 <= 50 && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = 10 + (rand() % (map[colonne][ligne] - 10));
                     }
@@ -239,7 +239,7 @@ int classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = 10 + (rand() % (map[colonne][ligne] - 10));
                     }
-                    if (ligne + 1 <= 50 && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = 10 + (rand() % (map[colonne][ligne] - 10));
                     }
@@ -274,7 +274,7 @@ int classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = 1 + (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= 50 && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= WIDTH && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = 1 + (rand() % map[colonne][ligne]);
                     }
@@ -282,7 +282,7 @@ int classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = 1 + (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= 50 && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = 1 + (rand() % map[colonne][ligne]);
                     }
@@ -350,7 +350,7 @@ int toundra(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= 50 && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -358,7 +358,7 @@ int toundra(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= 50 && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -391,7 +391,7 @@ int toundra(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = 1 + (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= 50 && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = 1 + (rand() % map[colonne][ligne]);
                     }
@@ -399,7 +399,7 @@ int toundra(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = 1 + (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= 50 && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = 1 + (rand() % map[colonne][ligne]);
                     }
@@ -443,7 +443,7 @@ int desert(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= 50 && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -451,7 +451,7 @@ int desert(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= 50 && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = -1 * (rand() % map[colonne][ligne]);
                     }
