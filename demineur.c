@@ -19,6 +19,55 @@ int difficulty = 0;
 char** usergrid;
 char** minegrid;
 int totalmines;
+bool began = false;
+
+void generategrid(int h, int l) {
+	int p_mines = 0;
+	switch(difficulty) {
+		case 1:
+			p_mines = 13;
+			break;
+		case 2:
+			p_mines = 15;
+			break;
+		case 3:
+			p_mines = 20;
+			break;
+	}
+	totalmines = p_mines * ((lcount - 1) * ccount) / 100;
+	for (int i = 0; i < totalmines; i++) {
+		int lrandom = random() % (lcount - 1);
+		int hrandom = random() % ccount;
+		while (minegrid[lrandom][hrandom] == 'X' || (lrandom == h && hrandom == l)) {
+			lrandom = random() % (lcount - 1);
+			hrandom = random() % ccount;
+		}
+		minegrid[lrandom][hrandom] = 'X';
+	}
+	for (int i = 0; i < (lcount - 1); i++) {
+		for (int j = 0; j < ccount; j++) {
+			if (minegrid[i][j] != 'X') {
+				int l_w = 0;
+				int r_w = 0;
+				int u_w = 0;
+				int d_w = 0;
+				if (i == 0) d_w = 1;
+				if (i == lcount - 2) u_w = 1;
+				if (j == 0) l_w = 1;
+				if (j == ccount - 1) r_w = 1;
+				int mcount_around = 0;
+				for (int r = l_w - 1; r <= 1 - r_w; r++) {
+					for (int u = d_w - 1; u <= 1 - u_w; u++) {
+						if (minegrid[i + u][j + r] == 'X') {
+							mcount_around++;
+						}
+					}
+				}
+				minegrid[i][j] = mcount_around + '0';
+			}
+		}
+	}
+}
 
 void clearscreen() {
 	printf("\e[1;1H\e[2J");
@@ -119,6 +168,10 @@ void printgrid() {
 }
 
 void showcase() {
+	if (!began) {
+		generategrid(player_h, player_l);
+		began = true;
+	}
 	if (usergrid[player_h][player_l] == 'X') {
 		if (minegrid[player_h][player_l] == 'X') {
 			clearscreen();
@@ -138,12 +191,14 @@ void showcase() {
 			if (player_h == ccount - 1) r_w = 1;
 			for (int i = l_w - 1; i <= 1 - r_w; i++) {
 				for (int j = d_w - 1; j <= 1 - u_w; j++) {
-					if (usergrid[player_h + i][player_l + j] != 'O') {
-						player_h += i;
-						player_l += j;
-						showcase();
-						player_h -= i;
-						player_l -= j;
+					if (i != 0 || j != 0) {
+						if (usergrid[player_h + i][player_l + j] != 'O') {
+							player_h += i;
+							player_l += j;
+							showcase();
+							player_h -= i;
+							player_l -= j;
+						}
 					}
 				}
 			}
@@ -167,8 +222,7 @@ void showcase() {
 				showcase();
 				player_h--;
 			}*/
-		}
-		else
+		} else
 			usergrid[player_h][player_l] = 'O';
 	}
 	countcases();
@@ -227,54 +281,6 @@ void* printinput(void* ptr) {
 	}
 }
 
-void generategrid() {
-	int p_mines = 0;
-	switch(difficulty) {
-		case 1:
-			p_mines = 13;
-			break;
-		case 2:
-			p_mines = 15;
-			break;
-		case 3:
-			p_mines = 20;
-			break;
-	}
-	totalmines = p_mines * ((lcount - 1) * ccount) / 100;
-	for (int i = 0; i < totalmines; i++) {
-		int lrandom = random() % (lcount - 1);
-		int hrandom = random() % ccount;
-		while (minegrid[lrandom][hrandom] == 'X' || (lrandom == 0 && hrandom == 0)) {
-			lrandom = random() % (lcount - 1);
-			hrandom = random() % ccount;
-		}
-		minegrid[lrandom][hrandom] = 'X';
-	}
-	for (int i = 0; i < (lcount - 1); i++) {
-		for (int j = 0; j < ccount; j++) {
-			if (minegrid[i][j] != 'X') {
-				int l_w = 0;
-				int r_w = 0;
-				int u_w = 0;
-				int d_w = 0;
-				if (i == 0) d_w = 1;
-				if (i == lcount - 2) u_w = 1;
-				if (j == 0) l_w = 1;
-				if (j == ccount - 1) r_w = 1;
-				int mcount_around = 0;
-				for (int r = l_w - 1; r <= 1 - r_w; r++) {
-					for (int u = d_w - 1; u <= 1 - u_w; u++) {
-						if (minegrid[i + u][j + r] == 'X') {
-							mcount_around++;
-						}
-					}
-				}
-				minegrid[i][j] = mcount_around + '0';
-			}
-		}
-	}
-}
-
 void* updatetimer(void* ptr) {
 	sleep(1);
 	if (!isinmenu) {
@@ -298,6 +304,7 @@ void createlevel() {
 }
 
 int main (int argc, char **argv) {
+	srandom(time(NULL));
 	clearscreen();
 	struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -314,7 +321,7 @@ int main (int argc, char **argv) {
 		}
 	}
 	createlevel();
-	generategrid();
+//	generategrid();
 //	showscore();
 	printgrid();
 	pthread_t getinput;
