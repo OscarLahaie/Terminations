@@ -282,11 +282,13 @@ void* printinput(void* ptr) {
 }
 
 void* updatetimer(void* ptr) {
-	sleep(1);
-	if (!isinmenu) {
-		timer++;
-//		showscore();
-		printgrid();
+	while (true) {
+		sleep(1);
+		if (!isinmenu) {
+			timer++;
+			showscore();
+//			printgrid();
+		}
 	}
 }
 
