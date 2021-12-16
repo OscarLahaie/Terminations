@@ -14,6 +14,8 @@ bool** current;
 bool** next;
 bool firstlaunch = true;
 bool computing = false;
+int generations = 0;
+int sleeptime = 100000;
 
 void calculate() {
 	for (int i = 0; i < lcount; i++) {
@@ -53,6 +55,7 @@ void calculate() {
 			current[i][j] = next[i][j];
 		}
 	}
+	generations += 1;
 }
 
 void clearscreen() {
@@ -78,7 +81,15 @@ void printgrid() {
 		}
 		printf("\r\033[A");
 	}
-	for (int i = 0; i < lcount; i++) {
+	printf("\r\033[A");
+	int strlen = 0;
+	int gen_len = generations;
+	while (gen_len > 0) {
+		strlen++;
+		gen_len /= 10;
+	}
+	printf("\r\033[31;47mGenerations : %d%*s\033[0m", generations, ccount - strlen + 50, "\033[47;32mq : exit\033[47m, \033[47;33mm : switch cell status\033[47m, \033[47;34m+ : faster\033[47m, \033[47;35m- : slower\033[47m, \033[47;36mSpace : play/pause\033[47m");
+	for (int i = 0; i < lcount + 1; i++) {
 		printf("\r\033[B");
 	}
 }
@@ -88,7 +99,7 @@ void* play(void* ptr) {
 		if (computing) {
 			calculate();
 			printgrid();
-			usleep(100000);
+			usleep(sleeptime);
 		}
 	}
 }
@@ -122,20 +133,31 @@ void printinput(void) {
 			case 'm':
 				markcase();
 				break;
+			case '+':
+				if (sleeptime > 50000)
+					sleeptime -= 50000;
+				else if (sleeptime > 10000)
+					sleeptime -= 10000;
+				else if (sleeptime > 1000)
+					sleeptime -= 1000;
+				break;
+			case '-':
+				sleeptime += 50000;
+				break;
 			default:
 				break;
 		}
 		printgrid();
 	}
-	exit(0);
 }
 
 int main (int argc, char **argv) {
 	clearscreen();
+	printf("\e[?25l");
 	struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	ccount = w.ws_col;
-	lcount = w.ws_row;
+	lcount = w.ws_row - 1;
 	current = (bool**) malloc(sizeof(bool*) * lcount);
 	next = (bool**) malloc(sizeof(bool*) * lcount);
 	for (int i = 0; i < lcount; i++) {
@@ -146,7 +168,13 @@ int main (int argc, char **argv) {
 			next[i][j] = false;
 		}
 	}
+	printgrid();
 	printinput();
-	system("clear");
-	system("reset");
+	for (int i = 0; i < lcount; i++) {
+		free(current[i]);
+		free(next[i]);
+	}
+	free(current);
+	free(next);
+	printf("\e[?25h");
 }

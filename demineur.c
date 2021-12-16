@@ -87,6 +87,7 @@ void countcases() {
 		system("clear");
 		system("reset");
 		printf("Time : %d seconds\n", timer);
+		printf("\e[?25h");
 		exit(0);
 	}
 }
@@ -178,6 +179,7 @@ void showcase() {
 			system("clear");
 			system("reset");
 			printf("\r\033[31mYou hit a mine\033[0m\n");
+			printf("\e[?25h");
 			exit(0);
 		} else if (minegrid[player_h][player_l] == '0') {
 			usergrid[player_h][player_l] = 'O';
@@ -308,6 +310,7 @@ void createlevel() {
 int main (int argc, char **argv) {
 	srandom(time(NULL));
 	clearscreen();
+	printf("\e[?25l");
 	struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	ccount = w.ws_col;
@@ -331,6 +334,7 @@ int main (int argc, char **argv) {
 	pthread_create(&getinput, NULL, printinput, NULL);
 	pthread_create(&launchtimer, NULL, updatetimer, NULL);
 	pthread_join(getinput, NULL);
+	printf("\e[?25h");
 	system("clear");
 	system("reset");
 }
