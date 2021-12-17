@@ -35,7 +35,7 @@ void printhelp() {
 	}
 }
 
-void* printinput(void*) {
+void* printinput(void* ptr) {
 	int c;
 	system("/usr/bin/stty raw");
 	while ((c = getchar()) != 27) {
