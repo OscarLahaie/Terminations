@@ -320,6 +320,7 @@ void startaskserver() {
 }
 
 void* waitforevent() {
+	char* usermove = malloc(4 * sizeof(char));
 	while (true) {
 		skipturn = false;
 		if (sockfd != 0 && !iswhiteplayer && firstmove == 0) {
@@ -331,7 +332,6 @@ void* waitforevent() {
 			printf("\033[33mYour turn to play\033[0m\n");
 			if (keyboardmode == LETTERSMODE) {
 				system("/usr/bin/stty cooked");
-				char* usermove = malloc(4 * sizeof(char));
 				scanf("%s", usermove);
 				if (strcmp(usermove, "m") == 0) {
 					keyboardmode = ARROWSMODE;
@@ -381,17 +381,18 @@ void* waitforevent() {
 							cursor_pos_x--;
 						break;
 					case 'q':
-						char* quit = "QUIT";
-						send(sockfd, quit, 4, 0);
+						usermove = "QUIT";
+						send(sockfd, usermove, 4, 0);
+						break;
 					case ' ':
 						if (firstpart == 0) {
 							firstpart += cursor_pos_y * 1000 + cursor_pos_x * 100;
 						} else {
 							firstpart += cursor_pos_y * 10 + cursor_pos_x;
 							sendpacket = true;
-							char* mymove = malloc(4 * sizeof(char));
-							sprintf(mymove, "%d", firstpart);
-							send(sockfd, mymove, 4, 0);
+							char* usermove = malloc(4 * sizeof(char));
+							sprintf(usermove, "%d", firstpart);
+							send(sockfd, usermove, 4, 0);
 							firstpart = 0;
 						}
 						break;
