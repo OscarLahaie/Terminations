@@ -36,11 +36,11 @@ void generategrid(int h, int l) {
 	}
 	totalmines = p_mines * ((lcount - 1) * ccount) / 100;
 	for (int i = 0; i < totalmines; i++) {
-		int lrandom = random() % (lcount - 1);
-		int hrandom = random() % ccount;
+		int lrandom = rand() % (lcount - 1);
+		int hrandom = rand() % ccount;
 		while (minegrid[lrandom][hrandom] == 'X' || (lrandom == h && hrandom == l)) {
-			lrandom = random() % (lcount - 1);
-			hrandom = random() % ccount;
+			lrandom = rand() % (lcount - 1);
+			hrandom = rand() % ccount;
 		}
 		minegrid[lrandom][hrandom] = 'X';
 	}
@@ -70,7 +70,7 @@ void generategrid(int h, int l) {
 }
 
 void clearscreen() {
-	printf("\e[1;1H\e[2J");
+	printf("\033[1;1H\033[2J");
 }
 
 void countcases() {
@@ -87,7 +87,7 @@ void countcases() {
 		system("clear");
 		system("reset");
 		printf("Time : %d seconds\n", timer);
-		printf("\e[?25h");
+		printf("\033[?25h");
 		exit(0);
 	}
 }
@@ -179,7 +179,7 @@ void showcase() {
 			system("clear");
 			system("reset");
 			printf("\r\033[31mYou hit a mine\033[0m\n");
-			printf("\e[?25h");
+			printf("\033[?25h");
 			exit(0);
 		} else if (minegrid[player_h][player_l] == '0') {
 			usergrid[player_h][player_l] = 'O';
@@ -245,7 +245,7 @@ void printhelp() {
 	isinmenu = false;
 }
 
-void* printinput(void* ptr) {
+void* printinput() {
 	int c;
 	system("/usr/bin/stty raw");
 	while ((c = getchar()) != 'q') {
@@ -281,9 +281,10 @@ void* printinput(void* ptr) {
 			printgrid();
 //		}
 	}
+	return NULL;
 }
 
-void* updatetimer(void* ptr) {
+void* updatetimer() {
 	while (true) {
 		sleep(1);
 		if (!isinmenu) {
@@ -302,15 +303,15 @@ void createlevel() {
 		c = getchar();
 		int i = c - '0';
 		diff = i;
-		printf("\e[1;1H\e[2J");
+		printf("\033[1;1H\033[2J");
 	}
 	difficulty = diff;
 }
 
-int main (int argc, char **argv) {
-	srandom(time(NULL));
+int main () {
+	srand(time(NULL));
 	clearscreen();
-	printf("\e[?25l");
+	printf("\033[?25l");
 	struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	ccount = w.ws_col;
@@ -334,7 +335,7 @@ int main (int argc, char **argv) {
 	pthread_create(&getinput, NULL, printinput, NULL);
 	pthread_create(&launchtimer, NULL, updatetimer, NULL);
 	pthread_join(getinput, NULL);
-	printf("\e[?25h");
+	printf("\033[?25h");
 	system("clear");
 	system("reset");
 }

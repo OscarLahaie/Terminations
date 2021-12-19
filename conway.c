@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define _BSD_SOURCE
+
 int lcount;
 int ccount;
 int player_h = 0;
@@ -36,7 +38,6 @@ void calculate() {
 					}
 				}
 			}
-//			if (sum_around != 0) printf("\r%d\n", sum_around);
 			if (current[i][j]) {
 				if (sum_around == 2 || sum_around == 3)
 					next[i][j] = true;
@@ -59,7 +60,7 @@ void calculate() {
 }
 
 void clearscreen() {
-	printf("\e[1;1H\e[2J");
+	printf("\033[1;1H\033[2J");
 }
 
 void markcase() {
@@ -94,7 +95,7 @@ void printgrid() {
 	}
 }
 
-void* play(void* ptr) {
+void* play() {
 	while (true) {
 		if (computing) {
 			calculate();
@@ -151,9 +152,9 @@ void printinput(void) {
 	}
 }
 
-int main (int argc, char **argv) {
+int main () {
 	clearscreen();
-	printf("\e[?25l");
+	printf("\033[?25l");
 	struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	ccount = w.ws_col;
@@ -176,5 +177,5 @@ int main (int argc, char **argv) {
 	}
 	free(current);
 	free(next);
-	printf("\e[?25h");
+	printf("\033[?25h");
 }
