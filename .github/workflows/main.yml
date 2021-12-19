@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [ valentin ]
   pull_request:
-    branches: [ main ]
+    branches: [ valentin ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
       - name: Build everything
         run: |
           mkdir -p publish
-          for file in *.c; do gcc $file -o publish/$(basename $file .c) -lpthread; done
+          for file in *.c; do gcc $file -o publish/$(basename $file .c) -lpthread -Wall -Werror -pedantic -D _DEFAULT_SOURCE; done
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
