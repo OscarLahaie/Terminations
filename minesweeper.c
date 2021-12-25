@@ -152,7 +152,7 @@ void printgrid() {
 				}
 			} else {
 				char c;
-				if (usergrid[i][j] == 'M') c = '?';
+				if (usergrid[i][j] == 'M') c = '!';
 				else c = '+';
 				if (i == player_h && j == player_l) {
 					printf("\033[30;41m%c\033[0m", c);
