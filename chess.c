@@ -133,7 +133,7 @@ bool is_move_allowed(int color, int start_y, int start_x, int finish_y, int fini
 				x_delta = -1; // Moving to the left
 			else if (finish_x - start_x > 0)
 				x_delta = 1; // Moving to the right
-			for (int i = 1; i < ((abs(finish_y - start_y) = 0) ? abs(finish_x - start_x) : abs(finish_y - start_y)); i++) {
+			for (int i = 1; i < ((abs(finish_y - start_y) == 0) ? abs(finish_x - start_x) : abs(finish_y - start_y)); i++) {
 //			for (int i = 1; i < abs(finish_y - start_y); i++) {
 				if (strcmp(grid[start_y + y_delta * i][start_x + x_delta * i], " ") != 0) { // Check if any non-empty case is on the path of the queen
 					return false;
