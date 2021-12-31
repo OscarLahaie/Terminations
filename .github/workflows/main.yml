@@ -28,7 +28,7 @@ jobs:
       - name: Build everything
         run: |
           mkdir -p publish
-          for file in *.c; do gcc $file -o publish/$(basename $file .c) -lpthread -Wall -Werror -pedantic -D _DEFAULT_SOURCE; done
+          for file in *.c; do gcc $file -o publish/$(basename $file .c) -lpthread -lncurses -Wall -Werror -pedantic -D _DEFAULT_SOURCE; done
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
