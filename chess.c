@@ -70,9 +70,6 @@
 #define G 6
 #define H 7
 
-#define SERVER 0
-#define CLIENT 1
-
 //int globalscore = 0;
 //char letters[8] = "ABCDEFGH";
 char* pieces[2][6] = {
@@ -136,7 +133,8 @@ bool is_move_allowed(int color, int start_y, int start_x, int finish_y, int fini
 				x_delta = -1; // Moving to the left
 			else if (finish_x - start_x > 0)
 				x_delta = 1; // Moving to the right
-			for (int i = 1; i < abs(finish_y - start_y); i++) {
+			for (int i = 1; i < ((abs(finish_y - start_y) = 0) ? abs(finish_x - start_x) : abs(finish_y - start_y)); i++) {
+//			for (int i = 1; i < abs(finish_y - start_y); i++) {
 				if (strcmp(grid[start_y + y_delta * i][start_x + x_delta * i], " ") != 0) { // Check if any non-empty case is on the path of the queen
 					return false;
 				}
@@ -212,12 +210,7 @@ bool is_move_allowed(int color, int start_y, int start_x, int finish_y, int fini
 			return false;
 		}
 	} else if (strcmp(grid[start_y][start_x], pieces[color][PAWN]) == 0 ) { // Allowed moves for the pawn
-		int check = 0;
-		if (iswhiteplayer) {
-			check = 1;
-		} else {
-			check = 6;
-		}
+		int check = iswhiteplayer ? 1 : 6;
 		if (color == BLACKS) { // This matters because pawns can only go forward
 			if (finish_x == start_x && finish_y - start_y == - 2 && start_y == check) { // Allow two cases in front it pawn is at its start point
 				if (strcmp(grid[finish_y][finish_x], " ") == 0) {
@@ -320,7 +313,7 @@ void printgrid() {
 	printf(" \033[31mABCDEFGH\033[0m\n\r");
 	for (int i = 0; i < 8; i++) {
 		if (!iswhiteplayer)
-			printf("\033[31m%d\033[0m", i);
+			printf("\033[31m%d\033[0m", i + 1);
 		for (int j = 0; j < 8; j++) {
 			int casecolor;
 			// Use color for allowed moves
@@ -389,11 +382,11 @@ void printgrid() {
 	}
 	if (iswhiteplayer) {
 		for (int i = 7; i >= 0; i--) {
-			printf("\033[31m%d\033[0m", 8 - i);
+			printf("\033[31m%d\033[0m", i + 1);
 			for (int j = 0; j < 8; j++) {
 				printf("\033[%dm%s\033[0m", invertedbuffer[i][j], grid[i][j]);
 			}
-			printf("\033[31m%d\033[0m", 8 - i);
+			printf("\033[31m%d\033[0m", i + 1);
 			printf("\n");
 		}
 	}
@@ -404,7 +397,6 @@ void printgrid() {
 		if (i == 7)
 			printf("\n\r");
 	}
-	printf("\n");
 }
 
 // Client connect code
@@ -444,7 +436,7 @@ void startconnect() {
 	int color2;
 	recv(sockfd, &color2, sizeof(int), 0);
 	clearscreen();
-	iswhiteplayer = color2 == 1;
+	iswhiteplayer = color2 == WHITES;
 }
 
 // Server host code
@@ -523,11 +515,9 @@ void startserver() {
 	int sendblack2;
 	switch(player_pos) {
 		case 0:
-			iswhiteplayer = true;
 			sendblack2 = 0;
 			break;
 		case 1:
-			iswhiteplayer = false;
 			sendblack2 = 1;
 			break;
 		default:
@@ -663,7 +653,7 @@ void* waitforevent() {
 						doexit(0);
 					} else {
 						regex_t regex;
-						regcomp(&regex, "[A-G][1-8][A-G][1-8]", 0);
+						regcomp(&regex, "^[A-G][1-8][A-G][1-8]$", 0);
 						while (regexec(&regex, usermove, 0, NULL, 0) != 0) { // Check if the input is valid
 							printf("\033[A");
 							printf("\r\033[2KInvalid move\n");
