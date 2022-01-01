@@ -18,5 +18,4 @@ Les mini-jeux comprennent :
 
 ## Comment compiler
 ```bash
-#!/bin/bash
-for file in *.c; do gcc -o $(basename $file .c) $file -lpthread -std=c11 -Wall -Wextra -pedantic -D _DEFAULT_SOURCE; done
+./build.sh```
