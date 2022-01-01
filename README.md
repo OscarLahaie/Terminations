@@ -18,4 +18,4 @@ Les mini-jeux comprennent :
 
 ## Comment compiler
 ```bash
-./build.sh```
+./build.sh
