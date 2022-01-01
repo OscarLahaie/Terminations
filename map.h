@@ -159,7 +159,7 @@ void afficher(int map[HEIGHT][WIDTH], int type)
     }
 }
 
-int classique(int map[HEIGHT][WIDTH])
+void classique(int map[HEIGHT][WIDTH])
 {
     // Mise aléatoire de l'eau
     for (int colonne = 0; colonne < HEIGHT; colonne++)
@@ -317,10 +317,9 @@ int classique(int map[HEIGHT][WIDTH])
             }
         }
     }
-    return map;
 }
 
-int toundra(int map[HEIGHT][WIDTH])
+void toundra(int map[HEIGHT][WIDTH])
 {
 
     // Mise en place de la glace
@@ -413,7 +412,7 @@ int toundra(int map[HEIGHT][WIDTH])
     // Fin des arbres
 }
 
-int desert(int map[HEIGHT][WIDTH])
+void desert(int map[HEIGHT][WIDTH])
 {
 
     // Mise en place des oasis
