@@ -1,9 +1,12 @@
+#ifndef _map_h_
+#define _map_h_
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-#define HEIGHT 60
-#define WIDTH 40
+#define HEIGHT 25
+#define WIDTH 25
 
 void afficher(int map[HEIGHT][WIDTH], int type)
 {
@@ -476,17 +479,4 @@ int desert(int map[HEIGHT][WIDTH])
     // Fin des cactus
 }
 
-int main()
-{
-    srand(time(NULL));
-    int map[HEIGHT][WIDTH] = {0};
-
-    **map = classique(map);
-    afficher(map, 0);
-
-    **map = toundra(map);
-    afficher(map, 1);
-
-    **map = desert(map);
-    afficher(map, 2);
-}
+#endif
