@@ -23,6 +23,17 @@ int main(void){
         }
     }
 
+    char termination[] = "TERMINATION";
+    char hudfooter[] = "Que voulez vous faire ? (Play/Exit/Parametres) ";
+
+    for(j = 49; j < 60; j++){
+        hud[1][j] = termination[j-49];
+    }
+
+    for(j = 32; j < 79; j++){
+        hud[28][j] = hudfooter[j-32];
+    }
+
 //Play
     for(i = 5; i < 19; i++){
         for(j = 8; j < 48; j++){
@@ -330,5 +341,4 @@ int main(void){
         }
         printf("\n");
     }
-    printf("%c", 254);
 }
