@@ -112,7 +112,7 @@ bool sendpacket = false;
 int currentpiece[2] = {8, 8};
 int nextplayer = WHITES;
 bool promotion = false;
-char* promotion_char = "PROM";
+int promotedpiece = 0;
 
 // This will be useful to print the inverted grid for the black pieces player
 int invertedbuffer[8][8] = {{0}};
@@ -298,7 +298,7 @@ bool is_move_allowed(int color, int start_y, int start_x, int finish_y, int fini
 			} else if (finish_y - start_y == - 1 && abs(finish_x - start_x) == 1) { // Allow eating diagonally in front if there is an opposite team member
 				if (belongs(grid[finish_y][finish_x], 1 - color)) {
 					return true;
-				} else if (en_passant.allowed[color] && en_passant.col[color] == finish_x && finish_y == 2) {
+				} else if (en_passant.allowed[1 - color] && en_passant.col[1 - color] == finish_x && finish_y == 2) {
 					return true;
 					// En passant
 				} else {
@@ -327,7 +327,7 @@ bool is_move_allowed(int color, int start_y, int start_x, int finish_y, int fini
 			} else if (finish_y - start_y == 1 && abs(finish_x - start_x) == 1) { // Allow eating diagonally in front if there is an opposite team member
 				if (belongs(grid[finish_y][finish_x], 1 - color)) {
 					return true;
-				} else if (en_passant.allowed[color] && en_passant.col[color] == finish_x && finish_y == 5) {
+				} else if (en_passant.allowed[1 - color] && en_passant.col[1 - color] == finish_x && finish_y == 5) {
 					return true;
 					// En passant
 				} else {
@@ -789,7 +789,7 @@ void waitforevent() {
 						doexit(0);
 					} else {
 						regex_t regex;
-						regcomp(&regex, "[A-G][1-8][A-G][1-8]", 0);
+						regcomp(&regex, "[A-H][1-8][A-H][1-8]", 0);
 						while (regexec(&regex, usermove, 0, NULL, 0) != 0) { // Check if the input is valid according to regex
 							printf("\033[A");
 							printf("\r\033[2KInvalid move\n");
@@ -813,6 +813,10 @@ void waitforevent() {
 							prev[1] = (int) (usermove[0]) - 65;
 							next[0] = (usermove[3] - '0') - 1;
 							next[1] = (int) (usermove[2]) - 65;
+							if (strcmp(grid[prev[0]][prev[1]], pieces[iswhiteplayer ? WHITES : BLACKS][PAWN]) == 0 && abs(prev[0] - next[0]) == 2) { // En passant
+								en_passant.allowed[iswhiteplayer ? WHITES : BLACKS] = true;
+								en_passant.col[iswhiteplayer ? WHITES : BLACKS] = prev[1];
+							}
 							if (prev[0] == iswhiteplayer ? 0 : 1) {
 								switch(prev[1]) {
 									case 0:
@@ -846,6 +850,13 @@ void waitforevent() {
 							doexit(0);
 						}
 						lost_pieces[color][lost_pieces_count[color]] = grid[next[0]][next[1]];
+						lost_pieces_count[color] += 1;
+					}
+					if (strcmp(grid[prev[0]][prev[1]], pieces[1 - color][PAWN]) == 0 && prev[1] != next[1] && strcmp(grid[next[0]][next[1]], " ") == 0) {
+						// En passant
+						lost_pieces[color][lost_pieces_count[color]] = grid[next[0] + (iswhiteplayer ? -1 : 1)][next[1]];
+						grid[next[0] + (iswhiteplayer ? -1 : 1)][next[1]] = malloc(strlen(" "));
+						strcpy(grid[next[0] + (iswhiteplayer ? -1 : 1)][next[1]], " ");
 						lost_pieces_count[color] += 1;
 					}
 					if (strcmp(grid[prev[0]][prev[1]], pieces[iswhiteplayer ? WHITES : BLACKS][KING]) == 0 && strcmp(grid[next[0]][next[1]], pieces[iswhiteplayer ? WHITES : BLACKS][ROOK]) == 0) {
@@ -890,16 +901,27 @@ void waitforevent() {
 					}
 					if (strcmp(grid[next[0]][next[1]], pieces[1 - color][PAWN]) == 0 && next[0] == (iswhiteplayer ? 7 : 0)) {
 						// TODO: Promotion
-						printf("Promoted\n");
-						promotion = true;
+						printf("\rPromoted, you can change your pawn to something else :\n");
+						printf("\r1) Queen\n");
+						printf("\r2) Rook\n");
+						printf("\r3) Bishop\n");
+						printf("\r4) Knight\n");
+						printf("\r > ");
+						scanf("%d", &promotedpiece);
+						while (promotedpiece < 1 || promotedpiece > 4) {
+							scanf("%d", &promotedpiece);
+						}
+						grid[cursor_pos_y][cursor_pos_x] = malloc(strlen(pieces[1 - color][promotedpiece]));
+						strcpy(grid[cursor_pos_y][cursor_pos_x], pieces[1 - color][promotedpiece]);
 					}
 					if (gamemode == 1)
 						iswhiteplayer = !iswhiteplayer;
 					if (sockfd != 0) {
 						send(sockfd, usermove, 4, 0);
-//						if (promotion) {
-//							send(sockfd, promotion, 4, 0);
-//						}
+						if (promotedpiece != 0) {
+							send(sockfd, &promotedpiece, sizeof(int), 0);
+							promotedpiece = 0;
+						}
 					}
 				}
 			} else { // Playing in arrows mode : player moves the cursor with arrows and confirms with spacebar
@@ -978,6 +1000,13 @@ void waitforevent() {
 											break;
 									}
 								}
+								if (strcmp(grid[currentpiece[0]][currentpiece[1]], pieces[color][PAWN]) == 0 && currentpiece[1] != cursor_pos_x && strcmp(grid[cursor_pos_y][cursor_pos_x], " ") == 0) {
+									// En passant
+									lost_pieces[1 - color][lost_pieces_count[1 - color]] = grid[cursor_pos_y + (iswhiteplayer ? -1 : 1)][cursor_pos_x];
+									grid[cursor_pos_y + (iswhiteplayer ? -1 : 1)][cursor_pos_x] = malloc(strlen(" "));
+									strcpy(grid[cursor_pos_y + (iswhiteplayer ? -1 : 1)][cursor_pos_x], " ");
+									lost_pieces_count[1 - color] += 1;
+								}
 								if (strcmp(grid[currentpiece[0]][currentpiece[1]], pieces[color][PAWN]) == 0 && abs(currentpiece[0] - cursor_pos_y) == 2) { // En passant
 									en_passant.allowed[color] = true;
 									en_passant.col[color] = currentpiece[1];
@@ -1044,10 +1073,26 @@ void waitforevent() {
 								}
 								if (strcmp(grid[cursor_pos_y][cursor_pos_x], pieces[1 - color][PAWN]) == 0 && cursor_pos_y == (iswhiteplayer ? 7 : 0)) {
 									// TODO: Promotion
-									printf("Promoted\n");
+									printf("\rPromoted, you can change your pawn to something else :\n");
+									printf("\r1) Queen\n");
+									printf("\r2) Rook\n");
+									printf("\r3) Bishop\n");
+									printf("\r4) Knight\n");
+									printf("\r > ");
+									scanf("%d", &promotedpiece);
+									while (promotedpiece < 1 || promotedpiece > 4) {
+										scanf("%d", &promotedpiece);
+									}
+									grid[cursor_pos_y][cursor_pos_x] = malloc(strlen(pieces[1 - color][promotedpiece]));
+									strcpy(grid[cursor_pos_y][cursor_pos_x], pieces[1 - color][promotedpiece]);
 								}
-								if (sockfd != 0)
+								if (sockfd != 0) {
 									send(sockfd, usermove, 4, 0);
+									if (promotedpiece != 0) {
+										send(sockfd, &promotedpiece, sizeof(int), 0);
+										promotedpiece = 0;
+									}
+								}
 								currentpiece[0] = 8;
 								currentpiece[1] = 8;
 								if (gamemode == 1)
@@ -1091,6 +1136,17 @@ void waitforevent() {
 			int next[2] = {8 - (otherguymove[3] - '0'), (int) (otherguymove[2]) - 65};
 			if (belongs(grid[next[0]][next[1]], color)) {
 				lost_pieces[color][lost_pieces_count[color]] = grid[next[0]][next[1]];
+				lost_pieces_count[color] += 1;
+			}
+			if (strcmp(grid[prev[0]][prev[1]], pieces[1 - color][PAWN]) == 0 && abs(prev[0] - next[0]) == 2) { // En passant
+				en_passant.allowed[1 - color] = true;
+				en_passant.col[1 - color] = prev[1];
+			}
+			if (strcmp(grid[prev[0]][prev[1]], pieces[1 - color][PAWN]) == 0 && prev[1] != next[1] && strcmp(grid[next[0]][next[1]], " ") == 0) {
+				// En passant
+				lost_pieces[color][lost_pieces_count[color]] = grid[next[0] + (iswhiteplayer ? -1 : 1)][next[1]];
+				grid[next[0] + (iswhiteplayer ? -1 : 1)][next[1]] = malloc(strlen(" "));
+				strcpy(grid[next[0] + (iswhiteplayer ? -1 : 1)][next[1]], " ");
 				lost_pieces_count[color] += 1;
 			}
 			if (strcmp(grid[prev[0]][prev[1]], pieces[1 - color][KING]) == 0 && strcmp(grid[next[0]][next[1]], pieces[1 - color][ROOK]) == 0) {
@@ -1137,12 +1193,12 @@ void waitforevent() {
 				grid[prev[0]][prev[1]] = malloc(strlen(" "));
 				strcpy(grid[prev[0]][prev[1]], " ");
 			}
-			if (strcmp(grid[next[0]][next[1]], pieces[1 - color][PAWN]) == 0 && next[0] == (iswhiteplayer ? 0 : 8)) {
+			if (strcmp(grid[next[0]][next[1]], pieces[1 - color][PAWN]) == 0 && next[0] == (iswhiteplayer ? 0 : 7)) {
 				// Promotion
-				recv(sockfd, otherguymove, 4, 0);
-				int piece = otherguymove[0] - '0';
-				grid[next[0]][next[1]] = malloc(strlen(pieces[1 - color][piece]));
-				strcpy(grid[next[0]][next[1]], pieces[1 - color][piece]);
+				int promotedpiece;
+				recv(sockfd, &promotedpiece, sizeof(int), 0);
+				grid[next[0]][next[1]] = malloc(strlen(pieces[1 - color][promotedpiece]));
+				strcpy(grid[next[0]][next[1]], pieces[1 - color][promotedpiece]);
 			}
 			free(otherguymove);
 			clearscreen();
