@@ -1,22 +1,22 @@
 #ifndef _map_h_
 #define _map_h_
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#define HEIGHT_MAX 50
+#define WIDTH_MAX 50
 
-#define HEIGHT 25
-#define WIDTH 25
+int taille_hauteur = 30;
+int taille_largeur = 30;
 
-void afficher(int map[HEIGHT][WIDTH], int type)
+void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type)
 {
     if (type == 0)
     {
-        printf("%d\n", map[0][0]);
         map[0][0] = 1; // Bug à regler le premier element est ici indéfini donc je le fixe le mettant en prairie
-        for (int colonne = 0; colonne < HEIGHT; colonne++)
+        for (int colonne = 0; colonne < taille_hauteur; colonne++)
         {
-            for (int ligne = 0; ligne < WIDTH; ligne++)
+            for (int ligne = 0; ligne < taille_largeur; ligne++)
             {
                 // Couleur du fond
                 if (map[colonne][ligne] < 0)
@@ -67,11 +67,10 @@ void afficher(int map[HEIGHT][WIDTH], int type)
     }
     else if (type == 1)
     {
-        printf("%d\n", map[0][0]);
         map[0][0] = 1; // Bug à regler le premier element est ici indéfini donc je le fixe le mettant en glace
-        for (int colonne = 0; colonne < HEIGHT; colonne++)
+        for (int colonne = 0; colonne < taille_hauteur; colonne++)
         {
-            for (int ligne = 0; ligne < WIDTH; ligne++)
+            for (int ligne = 0; ligne < taille_largeur; ligne++)
             {
                 // Couleur du fond
                 if (map[colonne][ligne] < 0)
@@ -113,11 +112,10 @@ void afficher(int map[HEIGHT][WIDTH], int type)
     }
     else if (type == 2)
     {
-        printf("%d\n", map[0][0]);
         map[0][0] = 1; // Bug à regler le premier element est ici indéfini donc je le fixe le mettant en glace
-        for (int colonne = 0; colonne < HEIGHT; colonne++)
+        for (int colonne = 0; colonne < taille_hauteur; colonne++)
         {
-            for (int ligne = 0; ligne < WIDTH; ligne++)
+            for (int ligne = 0; ligne < taille_largeur; ligne++)
             {
                 // Couleur du fond
                 if (map[colonne][ligne] < 0)
@@ -159,12 +157,12 @@ void afficher(int map[HEIGHT][WIDTH], int type)
     }
 }
 
-void classique(int map[HEIGHT][WIDTH])
+void classique(int map[HEIGHT_MAX][WIDTH_MAX])
 {
     // Mise aléatoire de l'eau
-    for (int colonne = 0; colonne < HEIGHT; colonne++)
+    for (int colonne = 0; colonne < taille_hauteur; colonne++)
     {
-        for (int ligne = 0; ligne < WIDTH; ligne++)
+        for (int ligne = 0; ligne < taille_largeur; ligne++)
         {
             if (rand() % 1000 < 1)
             {
@@ -181,9 +179,9 @@ void classique(int map[HEIGHT][WIDTH])
 
     for (int i = 0; i < 5; i++)
     {
-        for (int colonne = 0; colonne < HEIGHT; colonne++)
+        for (int colonne = 0; colonne < taille_hauteur; colonne++)
         {
-            for (int ligne = 0; ligne < WIDTH; ligne++)
+            for (int ligne = 0; ligne < taille_largeur; ligne++)
             {
                 if (map[colonne][ligne] < 0)
                 {
@@ -191,7 +189,7 @@ void classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= taille_hauteur && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -199,7 +197,7 @@ void classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= taille_largeur && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -211,9 +209,9 @@ void classique(int map[HEIGHT][WIDTH])
 
     // Mise en place des montagnes
 
-    for (int colonne = 0; colonne < HEIGHT; colonne++)
+    for (int colonne = 0; colonne < taille_hauteur; colonne++)
     {
-        for (int ligne = 0; ligne < WIDTH; ligne++)
+        for (int ligne = 0; ligne < taille_largeur; ligne++)
         {
             if (rand() % 500 < 1 && map[colonne][ligne] == 1)
             {
@@ -224,9 +222,9 @@ void classique(int map[HEIGHT][WIDTH])
 
     for (int i = 0; i < 3; i++)
     {
-        for (int colonne = 0; colonne < HEIGHT; colonne++)
+        for (int colonne = 0; colonne < taille_hauteur; colonne++)
         {
-            for (int ligne = 0; ligne < WIDTH; ligne++)
+            for (int ligne = 0; ligne < taille_largeur; ligne++)
             {
                 if (map[colonne][ligne] > 10)
                 {
@@ -234,7 +232,7 @@ void classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = 10 + (rand() % (map[colonne][ligne] - 10));
                     }
-                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= taille_hauteur && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = 10 + (rand() % (map[colonne][ligne] - 10));
                     }
@@ -242,7 +240,7 @@ void classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = 10 + (rand() % (map[colonne][ligne] - 10));
                     }
-                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= taille_largeur && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = 10 + (rand() % (map[colonne][ligne] - 10));
                     }
@@ -255,9 +253,9 @@ void classique(int map[HEIGHT][WIDTH])
 
     // Mise en place des arbres
 
-    for (int colonne = 0; colonne < HEIGHT; colonne++)
+    for (int colonne = 0; colonne < taille_hauteur; colonne++)
     {
-        for (int ligne = 0; ligne < WIDTH; ligne++)
+        for (int ligne = 0; ligne < taille_largeur; ligne++)
         {
             if (rand() % 1000 < 1 && map[colonne][ligne] == 1)
             {
@@ -267,9 +265,9 @@ void classique(int map[HEIGHT][WIDTH])
     }
     for (int i = 0; i < 3; i++)
     {
-        for (int colonne = 0; colonne < HEIGHT; colonne++)
+        for (int colonne = 0; colonne < taille_hauteur; colonne++)
         {
-            for (int ligne = 0; ligne < WIDTH; ligne++)
+            for (int ligne = 0; ligne < taille_largeur; ligne++)
             {
                 if (map[colonne][ligne] > 1 && map[colonne][ligne] < 10)
                 {
@@ -277,7 +275,7 @@ void classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = 1 + (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= WIDTH && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= taille_largeur && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = 1 + (rand() % map[colonne][ligne]);
                     }
@@ -285,7 +283,7 @@ void classique(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = 1 + (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= taille_largeur && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = 1 + (rand() % map[colonne][ligne]);
                     }
@@ -297,9 +295,9 @@ void classique(int map[HEIGHT][WIDTH])
     //Fin de la mise en place des arbres
 
     //Harmonisation des reliefs
-    for (int colonne = 0; colonne < HEIGHT; colonne++)
+    for (int colonne = 0; colonne < taille_hauteur; colonne++)
     {
-        for (int ligne = 0; ligne < WIDTH; ligne++)
+        for (int ligne = 0; ligne < taille_largeur; ligne++)
         {
             if (map[colonne][ligne] < 10 && map[colonne][ligne] >= 2)
             {
@@ -307,9 +305,9 @@ void classique(int map[HEIGHT][WIDTH])
             }
         }
     }
-    for (int colonne = 0; colonne < HEIGHT; colonne++)
+    for (int colonne = 0; colonne < taille_hauteur; colonne++)
     {
-        for (int ligne = 0; ligne < WIDTH; ligne++)
+        for (int ligne = 0; ligne < taille_largeur; ligne++)
         {
             if (map[colonne][ligne] >= 10)
             {
@@ -319,13 +317,13 @@ void classique(int map[HEIGHT][WIDTH])
     }
 }
 
-void toundra(int map[HEIGHT][WIDTH])
+void toundra(int map[HEIGHT_MAX][WIDTH_MAX])
 {
 
     // Mise en place de la glace
-    for (int colonne = 0; colonne < HEIGHT; colonne++)
+    for (int colonne = 0; colonne < taille_hauteur; colonne++)
     {
-        for (int ligne = 0; ligne < WIDTH; ligne++)
+        for (int ligne = 0; ligne < taille_largeur; ligne++)
         {
             if (rand() % 1000 < 1)
             {
@@ -342,9 +340,9 @@ void toundra(int map[HEIGHT][WIDTH])
 
     for (int i = 0; i < 5; i++)
     {
-        for (int colonne = 0; colonne < HEIGHT; colonne++)
+        for (int colonne = 0; colonne < taille_hauteur; colonne++)
         {
-            for (int ligne = 0; ligne < WIDTH; ligne++)
+            for (int ligne = 0; ligne < taille_largeur; ligne++)
             {
                 if (map[colonne][ligne] < 0)
                 {
@@ -352,7 +350,7 @@ void toundra(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= taille_hauteur && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -360,7 +358,7 @@ void toundra(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= taille_largeur && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -371,9 +369,9 @@ void toundra(int map[HEIGHT][WIDTH])
     // Fin de la glace
 
     // Mise en place des arbres
-    for (int colonne = 0; colonne < HEIGHT; colonne++)
+    for (int colonne = 0; colonne < taille_hauteur; colonne++)
     {
-        for (int ligne = 0; ligne < WIDTH; ligne++)
+        for (int ligne = 0; ligne < taille_largeur; ligne++)
         {
             if (rand() % 1000 < 1 && map[colonne][ligne] == 1)
             {
@@ -383,9 +381,9 @@ void toundra(int map[HEIGHT][WIDTH])
     }
     for (int i = 0; i < 3; i++)
     {
-        for (int colonne = 0; colonne < HEIGHT; colonne++)
+        for (int colonne = 0; colonne < taille_hauteur; colonne++)
         {
-            for (int ligne = 0; ligne < WIDTH; ligne++)
+            for (int ligne = 0; ligne < taille_largeur; ligne++)
             {
                 if (map[colonne][ligne] > 1 && map[colonne][ligne] < 10)
                 {
@@ -393,7 +391,7 @@ void toundra(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = 1 + (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= taille_hauteur && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = 1 + (rand() % map[colonne][ligne]);
                     }
@@ -401,7 +399,7 @@ void toundra(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = 1 + (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= taille_largeur && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = 1 + (rand() % map[colonne][ligne]);
                     }
@@ -412,13 +410,13 @@ void toundra(int map[HEIGHT][WIDTH])
     // Fin des arbres
 }
 
-void desert(int map[HEIGHT][WIDTH])
+void desert(int map[HEIGHT_MAX][WIDTH_MAX])
 {
 
     // Mise en place des oasis
-    for (int colonne = 0; colonne < HEIGHT; colonne++)
+    for (int colonne = 0; colonne < taille_hauteur; colonne++)
     {
-        for (int ligne = 0; ligne < WIDTH; ligne++)
+        for (int ligne = 0; ligne < taille_largeur; ligne++)
         {
             if (rand() % 1000 < 1)
             {
@@ -435,9 +433,9 @@ void desert(int map[HEIGHT][WIDTH])
 
     for (int i = 0; i < 5; i++)
     {
-        for (int colonne = 0; colonne < HEIGHT; colonne++)
+        for (int colonne = 0; colonne < taille_hauteur; colonne++)
         {
-            for (int ligne = 0; ligne < WIDTH; ligne++)
+            for (int ligne = 0; ligne < taille_largeur; ligne++)
             {
                 if (map[colonne][ligne] < 0)
                 {
@@ -445,7 +443,7 @@ void desert(int map[HEIGHT][WIDTH])
                     {
                         map[colonne - 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (colonne + 1 <= HEIGHT && map[colonne + 1][ligne] == 1)
+                    if (colonne + 1 <= taille_hauteur && map[colonne + 1][ligne] == 1)
                     {
                         map[colonne + 1][ligne] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -453,7 +451,7 @@ void desert(int map[HEIGHT][WIDTH])
                     {
                         map[colonne][ligne - 1] = -1 * (rand() % map[colonne][ligne]);
                     }
-                    if (ligne + 1 <= WIDTH && map[colonne][ligne + 1] == 1)
+                    if (ligne + 1 <= taille_largeur && map[colonne][ligne + 1] == 1)
                     {
                         map[colonne][ligne + 1] = -1 * (rand() % map[colonne][ligne]);
                     }
@@ -464,9 +462,9 @@ void desert(int map[HEIGHT][WIDTH])
     // Fin de oasis
 
     // Mise en place des cactus
-    for (int colonne = 0; colonne < HEIGHT; colonne++)
+    for (int colonne = 0; colonne < taille_hauteur; colonne++)
     {
-        for (int ligne = 0; ligne < WIDTH; ligne++)
+        for (int ligne = 0; ligne < taille_largeur; ligne++)
         {
             if (rand() % 100 < 1 && map[colonne][ligne] == 1)
             {

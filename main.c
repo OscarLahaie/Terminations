@@ -454,7 +454,72 @@ int afficher_menu()
 
 void afficher_parametres(int selection)
 {
-    if (selection == 0)
+    printf("\033[40m");
+    printf("\033[37m");
+    printf("\rFleches du haut et du bas pour se déplacer et entrer pour selectionner\n\n");
+    printf("\rParamètres :\n\n");
+    printf("\rTaille de la carte :\n");
+    for (int i = 0; i < 5; i++)
+    {
+
+        if (i == selection && i * 5 + 20 == taille_map)
+        {
+            printf("\033[47m");
+            printf("\033[31m");
+            printf("\rtaille : %d*%d\n", i * 5 + 20, i * 5 + 20);
+        }
+        else if (i == selection)
+        {
+            printf("\033[47m");
+            printf("\033[30m");
+            printf("\rtaille : %d*%d\n", i * 5 + 20, i * 5 + 20);
+        }
+        else if (i * 5 + 20 == taille_map)
+        {
+            printf("\033[41m");
+            printf("\033[37m");
+            printf("\rtaille : %d*%d\n", i * 5 + 20, i * 5 + 20);
+        }
+        else
+        {
+            printf("\033[40m");
+            printf("\033[37m");
+            printf("\rtaille : %d*%d\n", i * 5 + 20, i * 5 + 20);
+        }
+    }
+    printf("\033[40m");
+    printf("\033[37m");
+    printf("\n\rDifficulté :\n");
+    char phrase[3][10] = {{"Facile"}, {"Medium"}, {"Dur"}};
+    for (int i = 0; i < 3; i++)
+    {
+
+        if (i + 5 == selection && i == difficulte)
+        {
+            printf("\033[47m");
+            printf("\033[31m");
+            printf("\rniveau : %s\n", phrase[i]);
+        }
+        else if (i + 5 == selection)
+        {
+            printf("\033[47m");
+            printf("\033[30m");
+            printf("\rniveau : %s\n", phrase[i]);
+        }
+        else if (i == difficulte)
+        {
+            printf("\033[41m");
+            printf("\033[37m");
+            printf("\rniveau : %s\n", phrase[i]);
+        }
+        else
+        {
+            printf("\033[40m");
+            printf("\033[37m");
+            printf("\rniveau : %s\n", phrase[i]);
+        }
+    }
+    if (selection == 8)
     {
         printf("\033[47m");
         printf("\033[30m");
@@ -464,77 +529,71 @@ void afficher_parametres(int selection)
         printf("\033[40m");
         printf("\033[37m");
     }
-    printf("Taille de la carte :\n");
-    for (int i = 0; i < 5; i++)
-    {
+    printf("\n\rExit");
 
-        if (i + 1 == selection && i * 5 + 20 == taille_map)
-        {
-            printf("\033[47m");
-            printf("\033[31m");
-            printf("taille : %d*%d\n", i * 5 + 20, i * 5 + 20);
-        }
-        else if (i + 1 == selection)
-        {
-            printf("\033[47m");
-            printf("\033[30m");
-            printf("taille : %d*%d\n", i * 5 + 20, i * 5 + 20);
-        }
-        else if (i * 5 + 20 == taille_map)
-        {
-            printf("\033[41m");
-            printf("\033[37m");
-            printf("taille : %d*%d\n", i * 5 + 20, i * 5 + 20);
-        }
-        else
-        {
-            printf("\033[40m");
-            printf("\033[37m");
-            printf("taille : %d*%d\n", i * 5 + 20, i * 5 + 20);
-        }
-    }
+    printf("\r");
+    printf("\033[0m");
 }
 
 int main(void)
 {
     system("reset");
-    int choix = afficher_menu();
-    if (choix == 0)
+    while (1)
     {
-        system("clear");
-        srand(time(NULL));
-
-        classique(map);
-        afficher(map, 0);
-        //liaison avec le jeu
-    }
-    else if (choix == 1)
-    {
-        system("clear");
-        printf("Merci d'avoir joué ! \n");
-    }
-    else if (choix == 2)
-    {
-        int c;
-        int selection = 0;
-        system("clear");
-        system("/usr/bin/stty raw");
-        while ((c = getchar()) != 'q')
+        int choix = afficher_menu();
+        if (choix == 0)
         {
-            printf("\r\033[2K");
             system("clear");
-            switch (c)
+            srand(time(NULL));
+
+            classique(map);
+            afficher(map, 0);
+            //liaison avec le jeu
+        }
+        else if (choix == 1)
+        {
+            system("clear");
+            printf("Merci d'avoir joué ! \n");
+            break;
+        }
+        else if (choix == 2)
+        {
+            int c;
+            int selection = 0;
+            system("clear");
+            system("/usr/bin/stty raw");
+            while ((c = getchar()) != 'q')
             {
-            case 'B':
-                if (selection != 5)
-                    selection++;
-                break;
-            case 'A':
-                if (selection != 0)
-                    selection--;
-                break;
+                printf("\r\033[2K");
+                system("clear");
+                switch (c)
+                {
+                case 'B':
+                    if (selection <= 8)
+                        selection++;
+                    break;
+                case 'A':
+                    if (selection >= 0)
+                        selection--;
+                    break;
+                case ' ':
+                    if (selection <= 4)
+                    {
+                        taille_map = 20 + selection * 5;
+                    }
+                    else if (selection <= 7)
+                    {
+                        difficulte = selection - 5;
+                    }
+                    break;
+                }
+                if (selection == 8 && c == ' ')
+                {
+                    system("reset");
+                    break;
+                }
+                afficher_parametres(selection);
             }
-            afficher_parametres(selection);
         }
     }
 }
