@@ -155,8 +155,8 @@ int main()
 
     maptest(map);
     Coordonnees depart;
-    depart.x = 2;
-    depart.y = 2;
+    depart.x = 15;
+    depart.y = 10;
     Coordonnees arrivee;
     arrivee.x = 22;
     arrivee.y = 22;
