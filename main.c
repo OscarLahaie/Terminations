@@ -11,6 +11,7 @@
 
 int taille_map = 25;
 int difficulte = 0;
+int biome = 0;
 int map[HEIGHT_MAX][WIDTH_MAX];
 // Retourne 0 si le joueur choisit de jouer, 1 si il désire quitter, 2 pour les paramètres
 int afficher_menu()
@@ -452,11 +453,12 @@ int afficher_menu()
     }
 }
 
-void afficher_parametres(int selection)
+void afficher_parametres_partie(int selection)
+
 {
     printf("\033[40m");
     printf("\033[37m");
-    printf("\rFleches du haut et du bas pour se déplacer et entrer pour selectionner\n\n");
+    printf("\rFleches du haut et du bas pour se déplacer et espace pour selectionner\n\n");
     printf("\rParamètres :\n\n");
     printf("\rTaille de la carte :\n");
     for (int i = 0; i < 5; i++)
@@ -489,12 +491,12 @@ void afficher_parametres(int selection)
     }
     printf("\033[40m");
     printf("\033[37m");
-    printf("\n\rDifficulté :\n");
-    char phrase[3][10] = {{"Facile"}, {"Medium"}, {"Dur"}};
+    printf("\n\rBiome :\n");
+    char phrase[3][15] = {{"Continental"}, {"Toundra"}, {"Désert"}};
     for (int i = 0; i < 3; i++)
     {
 
-        if (i + 5 == selection && i == difficulte)
+        if (i + 5 == selection && i == biome)
         {
             printf("\033[47m");
             printf("\033[31m");
@@ -506,7 +508,7 @@ void afficher_parametres(int selection)
             printf("\033[30m");
             printf("\rniveau : %s\n", phrase[i]);
         }
-        else if (i == difficulte)
+        else if (i == biome)
         {
             printf("\033[41m");
             printf("\033[37m");
@@ -519,7 +521,51 @@ void afficher_parametres(int selection)
             printf("\rniveau : %s\n", phrase[i]);
         }
     }
-    if (selection == 8)
+    printf("\033[40m");
+    printf("\033[37m");
+    printf("\n\rDifficulté :\n");
+    char phrase2[3][15] = {{"Facile"}, {"Medium"}, {"Dur"}};
+    for (int i = 0; i < 3; i++)
+    {
+
+        if (i + 8 == selection && i == difficulte)
+        {
+            printf("\033[47m");
+            printf("\033[31m");
+            printf("\rniveau : %s\n", phrase2[i]);
+        }
+        else if (i + 8 == selection)
+        {
+            printf("\033[47m");
+            printf("\033[30m");
+            printf("\rniveau : %s\n", phrase2[i]);
+        }
+        else if (i == difficulte)
+        {
+            printf("\033[41m");
+            printf("\033[37m");
+            printf("\rniveau : %s\n", phrase2[i]);
+        }
+        else
+        {
+            printf("\033[40m");
+            printf("\033[37m");
+            printf("\rniveau : %s\n", phrase2[i]);
+        }
+    }
+
+    if (selection == 11)
+    {
+        printf("\033[47m");
+        printf("\033[30m");
+    }
+    else
+    {
+        printf("\033[40m");
+        printf("\033[37m");
+    }
+    printf("\n\rPlay\n");
+    if (selection == 12)
     {
         printf("\033[47m");
         printf("\033[30m");
@@ -535,6 +581,57 @@ void afficher_parametres(int selection)
     printf("\033[0m");
 }
 
+int parametres_partie()
+{
+    int c;
+    int selection = 0;
+    system("clear");
+    system("/usr/bin/stty raw");
+    while ((c = getchar()) != 'q')
+    {
+        printf("\r\033[2K");
+        system("clear");
+        switch (c)
+        {
+        case 'B':
+            if (selection <= 12)
+                selection++;
+            break;
+        case 'A':
+            if (selection >= 0)
+                selection--;
+            break;
+        case ' ':
+            if (selection <= 4)
+            {
+                taille_map = 20 + selection * 5;
+            }
+            else if (selection <= 7)
+            {
+                biome = selection - 5;
+            }
+            else if (selection <= 10)
+            {
+                difficulte = selection - 7;
+            }
+            break;
+        }
+        if (selection == 11 && c == ' ')
+        {
+            system("reset");
+            return true;
+        }
+        if (selection == 12 && c == ' ')
+        {
+            system("reset");
+            return false;
+        }
+
+        afficher_parametres_partie(selection);
+    }
+    return 0;
+}
+
 int main(void)
 {
     system("reset");
@@ -545,9 +642,24 @@ int main(void)
         {
             system("clear");
             srand(time(NULL));
-
-            classique(map);
-            afficher(map, 0);
+            bool start = parametres_partie();
+            if (start)
+            {
+                if (biome == 0)
+                {
+                    classique(map, taille_map);
+                }
+                else if (biome == 1)
+                {
+                    toundra(map, taille_map);
+                }
+                else if (biome == 2)
+                {
+                    desert(map, taille_map);
+                }
+                afficher(map, biome, taille_map);
+                break;
+            }
             //liaison avec le jeu
         }
         else if (choix == 1)
@@ -558,42 +670,7 @@ int main(void)
         }
         else if (choix == 2)
         {
-            int c;
-            int selection = 0;
-            system("clear");
-            system("/usr/bin/stty raw");
-            while ((c = getchar()) != 'q')
-            {
-                printf("\r\033[2K");
-                system("clear");
-                switch (c)
-                {
-                case 'B':
-                    if (selection <= 8)
-                        selection++;
-                    break;
-                case 'A':
-                    if (selection >= 0)
-                        selection--;
-                    break;
-                case ' ':
-                    if (selection <= 4)
-                    {
-                        taille_map = 20 + selection * 5;
-                    }
-                    else if (selection <= 7)
-                    {
-                        difficulte = selection - 5;
-                    }
-                    break;
-                }
-                if (selection == 8 && c == ' ')
-                {
-                    system("reset");
-                    break;
-                }
-                afficher_parametres(selection);
-            }
+            break;
         }
     }
 }
