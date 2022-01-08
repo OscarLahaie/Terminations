@@ -473,4 +473,30 @@ void desert(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
     // Fin des cactus
 }
 
+void chateaux(int map[HEIGHT_MAX][WIDTH_MAX], int taille_map){
+    for(int colonne = (taille_map/2) - 4; colonne < (taille_map/2) + 5; colonne++){
+        if((colonne == (taille_map/2) - 4) && (colonne == (taille_map/2) - 2) && (colonne == (taille_map/2) + 2) && (colonne == (taille_map/2) + 4)){
+            for(int ligne = 0; ligne < 5; ligne++){
+                map[ligne][colonne] = 216;
+            }
+        }
+        if((colonne == (taille_map/2) - 3) && (colonne == (taille_map/2) + 3) && (colonne == taille_map/2)){
+            for(int ligne = 1; ligne < 4; ligne++){
+                map[ligne][colonne] = 216;
+            }
+        }
+        if((colonne == (taille_map/2) - 1) && (colonne == (taille_map/2) + 1)){
+            for(int ligne = 2; ligne < 4; ligne++){
+                map[ligne][colonne] = 216;
+            }
+        }
+
+        for(int ligne = 0; ligne < 5; ligne++){
+            if(map[ligne][colonne] == 216){
+                printf("\033[0;30m");
+            }
+        }
+    }
+}
+
 #endif
