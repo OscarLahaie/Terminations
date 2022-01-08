@@ -4,10 +4,18 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
+#include "map.h"
+#define HEIGHT_MAX 50
+#define WIDTH_MAX 50
 
+int taille_map = 25;
+int difficulte = 0;
+int map[HEIGHT_MAX][WIDTH_MAX];
 // Retourne 0 si le joueur choisit de jouer, 1 si il désire quitter, 2 pour les paramètres
 int afficher_menu()
 {
+    system("clear");
     int i, j;
     char hud[30][110];
 
@@ -444,7 +452,89 @@ int afficher_menu()
     }
 }
 
+void afficher_parametres(int selection)
+{
+    if (selection == 0)
+    {
+        printf("\033[47m");
+        printf("\033[30m");
+    }
+    else
+    {
+        printf("\033[40m");
+        printf("\033[37m");
+    }
+    printf("Taille de la carte :\n");
+    for (int i = 0; i < 5; i++)
+    {
+
+        if (i + 1 == selection && i * 5 + 20 == taille_map)
+        {
+            printf("\033[47m");
+            printf("\033[31m");
+            printf("taille : %d*%d\n", i * 5 + 20, i * 5 + 20);
+        }
+        else if (i + 1 == selection)
+        {
+            printf("\033[47m");
+            printf("\033[30m");
+            printf("taille : %d*%d\n", i * 5 + 20, i * 5 + 20);
+        }
+        else if (i * 5 + 20 == taille_map)
+        {
+            printf("\033[41m");
+            printf("\033[37m");
+            printf("taille : %d*%d\n", i * 5 + 20, i * 5 + 20);
+        }
+        else
+        {
+            printf("\033[40m");
+            printf("\033[37m");
+            printf("taille : %d*%d\n", i * 5 + 20, i * 5 + 20);
+        }
+    }
+}
+
 int main(void)
 {
-    afficher_menu();
+    system("reset");
+    int choix = afficher_menu();
+    if (choix == 0)
+    {
+        system("clear");
+        srand(time(NULL));
+
+        classique(map);
+        afficher(map, 0);
+        //liaison avec le jeu
+    }
+    else if (choix == 1)
+    {
+        system("clear");
+        printf("Merci d'avoir joué ! \n");
+    }
+    else if (choix == 2)
+    {
+        int c;
+        int selection = 0;
+        system("clear");
+        system("/usr/bin/stty raw");
+        while ((c = getchar()) != 'q')
+        {
+            printf("\r\033[2K");
+            system("clear");
+            switch (c)
+            {
+            case 'B':
+                if (selection != 5)
+                    selection++;
+                break;
+            case 'A':
+                if (selection != 0)
+                    selection--;
+                break;
+            }
+            afficher_parametres(selection);
+        }
+    }
 }
