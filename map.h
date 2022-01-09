@@ -27,7 +27,7 @@ struct Unites
     int equipe;
 };
 #endif
-void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection)
+void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection)
 {
     if (type == 0)
     {
@@ -76,20 +76,6 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                 {
                     printf("\033[41m");
                 }
-
-                else if (map[colonne][ligne] == 1000)
-                {
-                    printf("\033[101m");
-                }
-                else if (map[colonne][ligne] == 1001)
-                {
-                    printf("\033[101m");
-                }
-                else if (map[colonne][ligne] == 1002)
-                {
-                    printf("\033[101m");
-                }
-                
                 else
                 {
                     // Blanc pour les montagnes enneigées
@@ -98,47 +84,76 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                 // Fin couleur du fond
 
                 // Couleur + caractères
-                if (map[colonne][ligne] == 2)
+                if (map_unite[colonne][ligne] == 0)
                 {
-                    printf("\033[2;32m");
-                    printf("XX");
+                    if (map[colonne][ligne] == 2)
+                    {
+                        printf("\033[2;32m");
+                        printf("XX");
+                    }
+                    else if (map[colonne][ligne] > 5 && map[colonne][ligne] <= 10)
+                    {
+                        printf("\033[2;30m");
+                        printf("MM");
+                    }
+                    else if (map[colonne][ligne] == 101)
+                    {
+                        printf("\033[30m");
+                        printf("¤¤");
+                    }
+                    else if (map[colonne][ligne] == 216)
+                    {
+                        printf("\033[37m");
+                        printf("$$");
+                    }
+                    else
+                    {
+                        printf("  ");
+                    }
                 }
-                else if (map[colonne][ligne] > 5 && map[colonne][ligne] <= 10)
-                {
-                    printf("\033[2;30m");
-                    printf("MM");
-                }
-                else if (map[colonne][ligne] == 101)
-                {
-                    printf("\033[30m");
-                    printf("¤¤");
-                }
-                else if (map[colonne][ligne] == 216)
-                {
-                    printf("\033[37m");
-                    printf("$$");
-                }
-
-                else if (map[colonne][ligne] == 1000)
-                {
-                    printf("\033[30m");
-                    printf(":o");
-                }
-                else if (map[colonne][ligne] == 1001)
-                {
-                    printf("\033[30m");
-                    printf(":v");
-                }
-                else if (map[colonne][ligne] == 1002)
-                {
-                    printf("\033[30m");
-                    printf("B)");
-                }
-
                 else
                 {
-                    printf("  ");
+                    //Equipe rouge
+                    if (map_unite[colonne][ligne] == 1)
+                    {
+                        printf("\033[30;101m");
+                        printf(":o");
+                    }
+                    else if (map_unite[colonne][ligne] == 2)
+                    {
+                        printf("\033[30;101m");
+                        printf(":v");
+                    }
+                    else if (map_unite[colonne][ligne] == 3)
+                    {
+                        printf("\033[30;101m");
+                        printf("B)");
+                    }
+
+                    //Equipe bleue
+                    if (map_unite[colonne][ligne] == 10)
+                    {
+                        printf("\033[30;104m");
+                        printf(":o");
+                    }
+                    else if (map_unite[colonne][ligne] == 11)
+                    {
+                        printf("\033[30;104m");
+                        printf(":v");
+                    }
+                    else if (map_unite[colonne][ligne] == 12)
+                    {
+                        printf("\033[30;104m");
+                        printf("B)");
+                    }
+
+                    else
+                    {
+                        printf("\033[30m");
+                        printf("  ");
+                    }
                 }
+
                 // Fin couleur + caractères
                 printf("\033[0m");
             }
@@ -612,12 +627,13 @@ void desert(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
 void events(int map[HEIGHT_MAX][WIDTH_MAX], int taille, int nb_events)
 {
     int init = 1;
-    while(init <= nb_events)
+    while (init <= nb_events)
     {
-        int random_line = rand() % (taille+1);
-        int random_column = rand() % (taille+1);
+        int random_line = rand() % (taille + 1);
+        int random_column = rand() % (taille + 1);
 
-        if(map[random_line][random_column] == 1){
+        if (map[random_line][random_column] == 1)
+        {
             map[random_line][random_column] = 216;
             init++;
         }
