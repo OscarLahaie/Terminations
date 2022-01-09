@@ -62,7 +62,12 @@ Ficher header permettant de gérer les déplacement des pions et de l'IA à trav
 
 ## Conclusion
 
-Nous avons donc pu créer un jeu permettant l'affrontement entre deux équipes (celle du joueur et l'IA) et la défense des chateaux respectifs tout en mettant en place une génération procédurale sur plusieurs biomes. Les difficultés résidaient majoritairement dans la gestion des tableaux en eux même, et parfois dans le fait de déceler des erreurs qui ne sont pas forcément loggées correctement par le terminal lors de crash. Ce projet nous a permis d'approfondir nos connaissances sur les tableaux, notamment avec le pathfinder.
+Nous avons donc pu créer un jeu permettant l'affrontement entre deux équipes (celle du joueur et l'IA) et la défense des chateaux respectifs tout en mettant en place une génération procédurale sur plusieurs biomes, comprenant par exemple la génération de montagnes, de forêts et de lacs faisant obstacle au déplacement des pions. 
 
+Les difficultés résidaient majoritairement dans la gestion des tableaux en eux mêmes, et parfois dans le fait de déceler des erreurs qui ne sont pas forcément loggées correctement par le terminal lors de crash. Ce projet nous a permis d'approfondir nos connaissances sur les tableaux, notamment avec le pathfinder.
+
+De plus, nous avons pu de nouveau utiliser Github pour ce projet, nous permettant ainsi d'améliorer notre utilisation du logiciel et notre aisance vis-à-vis de celui-ci.
+
+<br/>
 
 Des mises à jours seront éventuellement disponibles plus tard afin d'améliorer la qualité du jeu et des actions possibles.
