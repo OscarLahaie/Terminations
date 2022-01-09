@@ -681,8 +681,9 @@ void actualise_unite(Unites tab_unites[50])
                 Coordonnees arrivee;
                 arrivee.x = tab_unites[i].deplacement_x;
                 arrivee.y = tab_unites[i].deplacement_y;
-
-                chemins(map_acces, chemin, depart, arrivee, taille_map);
+                int map_tmp[HEIGHT_MAX][WIDTH_MAX] = {0};
+                memcpy(map_tmp, map_acces, 50 * 50 * sizeof(int));
+                chemins(map_tmp, chemin, depart, arrivee, taille_map);
 
                 if (chemin[0].x == -1 && chemin[0].y == -1)
                 {
@@ -733,7 +734,7 @@ void deplace_unite(Coordonnees depart, int ligne, int colonne)
     {
         if (tab_unites[i].type >= 0)
         {
-            if (tab_unites[i].position_x == depart.x || tab_unites[i].position_y == depart.y)
+            if (tab_unites[i].position_x == depart.x && tab_unites[i].position_y == depart.y)
             {
                 tab_unites[i].deplacement_x = colonne;
                 tab_unites[i].deplacement_y = ligne;
@@ -778,13 +779,6 @@ int main(void)
                 mineur.deplacement_x = taille_map / 2;
                 mineur.deplacement_y = taille_map - 3;
                 tab_unites[1] = mineur;
-                mineur.type = 1;
-                mineur.equipe = 1;
-                mineur.position_x = 5;
-                mineur.position_y = 5;
-                mineur.deplacement_x = 7;
-                mineur.deplacement_y = 7;
-                tab_unites[2] = mineur;
 
                 nb_tours = 0;
 

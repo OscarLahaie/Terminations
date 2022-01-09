@@ -42,7 +42,7 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 {
                     if (etat_move)
                     {
-                        printf("\033[43m");
+                        printf("\033[4;5;213m");
                     }
                     else
                     {
