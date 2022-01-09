@@ -711,6 +711,7 @@ int main(void)
                     desert(map, taille_map);
                 }
                 chateaux(map, taille_map);
+                events(map, taille_map);
                 int c;
                 Coordonnees selection;
                 selection.x = 3;
