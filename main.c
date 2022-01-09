@@ -697,7 +697,7 @@ void affiche_unite(int mapf[HEIGHT_MAX][WIDTH_MAX])
         {
             if (tab_unites[i].position_x > -1 || tab_unites[i].position_y > -1)
             {
-                mapf[tab_unites[i].position_y][tab_unites[i].position_x] = 100 - tab_unites[i].type - tab_unites[i].equipe * 100;
+                mapf[tab_unites[i].position_y][tab_unites[i].position_x] = tab_unites[i].type + tab_unites[i].equipe * 10;
             }
         }
     }
@@ -725,16 +725,19 @@ int main(void)
                 }
 
                 Unites mineur;
-                mineur.type = 0;
+                mineur.type = 1;
                 mineur.equipe = 0;
-                mineur.position_x = taille_map / 2 + 1;
+                mineur.position_x = taille_map / 2;
                 mineur.position_y = 2;
-                mineur.deplacement_x = taille_map / 2 + 1;
+                mineur.deplacement_x = taille_map / 2;
                 mineur.deplacement_y = 2;
                 tab_unites[0] = mineur;
-                mineur.deplacement_y = taille_map - 2;
-                mineur.position_y = taille_map - 2;
+                mineur.type = 1;
                 mineur.equipe = 1;
+                mineur.position_x = taille_map / 2;
+                mineur.position_y = taille_map - 3;
+                mineur.deplacement_x = taille_map / 2;
+                mineur.deplacement_y = taille_map - 3;
                 tab_unites[1] = mineur;
 
                 nb_tours = 0;
@@ -763,6 +766,9 @@ int main(void)
                 do
                 {
                     int map_tmp[HEIGHT_MAX][WIDTH_MAX] = {{0}};
+                    map_tmp[1][1] = 1;
+                    map_tmp[2][1] = 2;
+                    map_tmp[3][1] = 3;
                     map_tmp[1][1] = 10;
                     map_tmp[2][1] = 11;
                     map_tmp[3][1] = 12;
