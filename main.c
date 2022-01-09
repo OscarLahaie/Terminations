@@ -31,8 +31,8 @@ struct Unites
 {
     int position_x = -1;
     int position_y = -1;
-    int deplacement_x = -1;
-    int deplacement_y = -1;
+    int final_x = -1;
+    int final_y = -1;
     int type = -1;
     int equipe = -1;
 };
@@ -661,6 +661,13 @@ int parametres_partie()
     }
     return 0;
 }
+/*
+void actualise_unite()
+{
+    for (int i = 0; i< nb_unites_max;i++){
+
+    }
+}*/
 
 int main(void)
 {
