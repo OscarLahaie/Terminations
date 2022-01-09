@@ -50,10 +50,10 @@ Terminations comporte 3 fichiers principaux :
 Il s'agit du fichiers coordonnant le jeu entier.
 C'est ici que nous appelons toutes les fonctions et que nous attribuons les valeurs utilisées.
 
-Ce fichier contient par exemple l'affichage du HUD designé par [@CassandreLAMATY](https://github.com/CassandreLAMATY), et le menu mis en place par [@OscarLahaie](https://github.com/OscarLahaie) permettant plusieurs paramétrages, notamment au niveau de la taille de la map et de son biome (3 biomes étant disponibles : la plaine (biome par défaut), la tundra et le désert ; chacun des biome apporte diverses fonctionnalités d'affichage pour permettre à l'utilisateur de varier son expérience de jeu).
+Ce fichier contient par exemple l'affichage du HUD (design par [@CassandreLAMATY](https://github.com/CassandreLAMATY)), et le menu mis en place par [@OscarLahaie](https://github.com/OscarLahaie) permettant plusieurs paramétrages, notamment au niveau de la taille de la map et de son biome (3 biomes étant disponibles : la plaine (biome par défaut), la tundra et le désert ; chacun des biome apporte diverses fonctionnalités d'affichage pour permettre à l'utilisateur de varier son expérience de jeu).
 
 #### map.h
-Fichier header (= fichier contenant les entêtes / fonctions principales du fichier main.c afin d'en limiter la longueur et d'en accroitre la lisibilité.) contenant toutes les fonctions utiles à l'affichage de la map, donc de la génération procédurale de chaque biome, l'affichage des chateaux, des cases d'évènements etc... . Pour résumer, il contient toute la partie graphique brute du jeu hormis le HUD et le menuing.
+Fichier header (= fichier contenant les entêtes / fonctions principales du fichier main.c afin d'en limiter la longueur et d'en accroitre la lisibilité.) contenant toutes les fonctions utiles à l'affichage de la map, donc de la génération procédurale de chaque biome, l'affichage des châteaux, des cases d'évènements etc... . Pour résumer, il contient toute la partie graphique brute du jeu hormis le HUD et le menuing.
 
 #### pathfinder.h
 Ficher header permettant de gérer les déplacement des pions et de l'IA à travers la map en esquivant les obstacles croisables en cours de route.
@@ -62,11 +62,11 @@ Ficher header permettant de gérer les déplacement des pions et de l'IA à trav
 
 ## Conclusion
 
-Nous avons donc pu créer un jeu permettant l'affrontement entre deux équipes (celle du joueur et l'IA) et la défense des chateaux respectifs tout en mettant en place une génération procédurale sur plusieurs biomes, comprenant par exemple la génération de montagnes, de forêts et de lacs faisant obstacle au déplacement des pions. 
+Nous avons donc pu créer un jeu permettant l'affrontement entre deux équipes (celle du joueur et l'IA) et la défense des châteaux respectifs tout en mettant en place une génération procédurale sur plusieurs biomes, comprenant par exemple la génération de montagnes, de forêts et de lacs faisant obstacle au déplacement des pions. 
 
 Les difficultés résidaient majoritairement dans la gestion des tableaux en eux mêmes, et parfois dans le fait de déceler des erreurs qui ne sont pas forcément loggées correctement par le terminal lors de crash. Ce projet nous a permis d'approfondir nos connaissances sur les tableaux, notamment avec le pathfinder.
 
-De plus, nous avons pu de nouveau utiliser Github pour ce projet, nous permettant ainsi d'améliorer notre utilisation du logiciel et notre aisance vis-à-vis de celui-ci.
+De plus, nous avons pu de nouveau utiliser GitHub pour ce projet, nous permettant ainsi d'améliorer notre utilisation du logiciel et notre aisance vis-à-vis de celui-ci.
 
 <br/>
 
