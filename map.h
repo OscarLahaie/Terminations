@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
 #define HEIGHT_MAX 50
 #define WIDTH_MAX 50
 #ifndef COORD
@@ -27,7 +28,7 @@ struct Unites
     int equipe;
 };
 #endif
-void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection)
+void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection, bool etat_move)
 {
     if (type == 0)
     {
@@ -39,7 +40,14 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 // Couleur du fond
                 if (selection.x == ligne && selection.y == colonne)
                 {
-                    printf("\033[105m");
+                    if (etat_move)
+                    {
+                        printf("\033[43m");
+                    }
+                    else
+                    {
+                        printf("\033[105m");
+                    }
                 }
                 else if (map[colonne][ligne] < 0)
                 {

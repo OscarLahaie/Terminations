@@ -41,6 +41,7 @@ struct Unites
 #endif
 Unites tab_unites[50];
 int const nb_unites_max = 50;
+Coordonnees unit_selection;
 // Retourne 0 si le joueur choisit de jouer, 1 si il désire quitter, 2 pour les paramètres
 int afficher_menu()
 {
@@ -672,18 +673,27 @@ void actualise_unite(Unites tab_unites[50])
         {
             if (tab_unites[i].position_x != tab_unites[i].deplacement_x || tab_unites[i].position_y != tab_unites[i].deplacement_y)
             {
+
                 Coordonnees chemin[HEIGHT_MAX * WIDTH_MAX];
                 Coordonnees depart;
                 depart.x = tab_unites[i].position_x;
                 depart.y = tab_unites[i].position_y;
                 Coordonnees arrivee;
-                arrivee.x = tab_unites[i].position_x;
-                arrivee.y = tab_unites[i].position_y;
+                arrivee.x = tab_unites[i].deplacement_x;
+                arrivee.y = tab_unites[i].deplacement_y;
 
                 chemins(map_acces, chemin, depart, arrivee, taille_map);
 
-                tab_unites[i].position_x = chemin[1].x;
-                tab_unites[i].position_y = chemin[1].y;
+                if (chemin[0].x == -1 && chemin[0].y == -1)
+                {
+                    tab_unites[i].deplacement_x = tab_unites[i].position_x;
+                    tab_unites[i].deplacement_y = tab_unites[i].position_y;
+                }
+                else
+                {
+                    tab_unites[i].position_x = chemin[1].x;
+                    tab_unites[i].position_y = chemin[1].y;
+                }
             }
         }
     }
@@ -698,6 +708,35 @@ void affiche_unite(int mapf[HEIGHT_MAX][WIDTH_MAX])
             if (tab_unites[i].position_x > -1 || tab_unites[i].position_y > -1)
             {
                 mapf[tab_unites[i].position_y][tab_unites[i].position_x] = tab_unites[i].type + tab_unites[i].equipe * 10;
+            }
+        }
+    }
+}
+
+bool est_unite(int ligne, int colonne)
+{
+    for (int i = 0; i < nb_unites_max; i++)
+    {
+        if (tab_unites[i].type >= 0)
+        {
+            if (tab_unites[i].position_x == colonne || tab_unites[i].position_y == ligne)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+void deplace_unite(Coordonnees depart, int ligne, int colonne)
+{
+    for (int i = 0; i < nb_unites_max; i++)
+    {
+        if (tab_unites[i].type >= 0)
+        {
+            if (tab_unites[i].position_x == depart.x || tab_unites[i].position_y == depart.y)
+            {
+                tab_unites[i].deplacement_x = colonne;
+                tab_unites[i].deplacement_y = ligne;
             }
         }
     }
@@ -743,8 +782,8 @@ int main(void)
                 mineur.equipe = 1;
                 mineur.position_x = 5;
                 mineur.position_y = 5;
-                mineur.deplacement_x = 10;
-                mineur.deplacement_y = 10;
+                mineur.deplacement_x = 7;
+                mineur.deplacement_y = 7;
                 tab_unites[2] = mineur;
 
                 nb_tours = 0;
@@ -769,6 +808,8 @@ int main(void)
                 Coordonnees selection;
                 selection.x = 3;
                 selection.y = 3;
+
+                bool etat_move = false;
                 system("/usr/bin/stty raw");
                 do
                 {
@@ -788,6 +829,27 @@ int main(void)
                     case 'D':
                         selection.x--;
                         break;
+                    case 'm':
+                        if (est_unite(selection.y, selection.x))
+                        {
+                            etat_move = true;
+                            unit_selection.x = selection.x;
+                            unit_selection.y = selection.y;
+                        }
+                        else
+                        {
+                            unit_selection.x = -1;
+                            unit_selection.y = -1;
+                            etat_move = false;
+                        }
+                        break;
+                    case ' ':
+                        deplace_unite(unit_selection, selection.y, selection.x);
+                        etat_move = false;
+                        unit_selection.x = -1;
+                        unit_selection.y = -1;
+                        break;
+
                     case 't':
                         nb_tours++;
                         if (nb_tours % 10 == 0)
@@ -795,12 +857,12 @@ int main(void)
                             events(map, taille_map, 1);
                         }
                         actualise_unite(tab_unites);
-                        affiche_unite(map_tmp);
+
                         break;
                     }
                     printf("\rNombre de tours : %d\n\r", nb_tours);
-
-                    afficher(map, map_tmp, biome, taille_map, selection);
+                    affiche_unite(map_tmp);
+                    afficher(map, map_tmp, biome, taille_map, selection, etat_move);
                 } while ((c = getchar()) != 'q');
                 break;
                 //liaison avec le jeu
