@@ -27,7 +27,7 @@ struct Unites
     int equipe;
 };
 #endif
-void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int int type, int taille, Coordonnees selection)
+void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection)
 {
     if (type == 0)
     {
