@@ -113,17 +113,17 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 }
                 else
                 {
-                    if (map_unite[colonne][ligne] == -100)
+                    if (map_unite[colonne][ligne] == 1)
                     {
                         printf("\033[30m");
                         printf(":o");
                     }
-                    else if (map_unite[colonne][ligne] == -101)
+                    else if (map_unite[colonne][ligne] == 2)
                     {
                         printf("\033[30m");
                         printf(":v");
                     }
-                    else if (map_unite[colonne][ligne] == -102)
+                    else if (map_unite[colonne][ligne] == 3)
                     {
                         printf("\033[30m");
                         printf("B)");
