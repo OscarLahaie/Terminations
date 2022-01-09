@@ -581,23 +581,14 @@ void desert(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
 void events(int map[HEIGHT_MAX][WIDTH_MAX], int taille, int nb_events)
 {
     int init = 1;
-    for (int colonne = 0; colonne < taille; colonne++)
+    while(init <= nb_events)
     {
-        for (int ligne = 0; ligne < taille; ligne++)
-        {
-            if (rand() % 100 < 1 && map[ligne][colonne] == 1)
-            {
-                map[ligne][colonne] = 216;
-                init++;
-            }
-            if (init > nb_events)
-            {
-                break;
-            }
-        }
-        if (init > nb_events)
-        {
-            break;
+        int random_line = rand() % (taille+1);
+        int random_column = rand() % (taille+1);
+
+        if(map[random_line][random_column] == 1){
+            map[random_line][random_column] = 216;
+            init++;
         }
     }
 }
