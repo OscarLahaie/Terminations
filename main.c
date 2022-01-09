@@ -766,6 +766,9 @@ int main(void)
                     map_tmp[1][1] = 10;
                     map_tmp[2][1] = 11;
                     map_tmp[3][1] = 12;
+                    map_tmp[1][2] = 1;
+                    map_tmp[2][2] = 2;
+                    map_tmp[3][2] = 3;
                     system("clear");
                     switch (c)
                     {
