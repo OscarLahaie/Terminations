@@ -76,20 +76,6 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 {
                     printf("\033[41m");
                 }
-
-                else if (map[colonne][ligne] == -100)
-                {
-                    printf("\033[101m");
-                }
-                else if (map[colonne][ligne] == -101)
-                {
-                    printf("\033[101m");
-                }
-                else if (map[colonne][ligne] == -102)
-                {
-                    printf("\033[101m");
-                }
-
                 else
                 {
                     // Blanc pour les montagnes enneigées
@@ -98,47 +84,57 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 // Fin couleur du fond
 
                 // Couleur + caractères
-                if (map[colonne][ligne] == 2)
+                if (map_unite[colonne][ligne] == 0)
                 {
-                    printf("\033[2;32m");
-                    printf("XX");
+                    if (map[colonne][ligne] == 2)
+                    {
+                        printf("\033[2;32m");
+                        printf("XX");
+                    }
+                    else if (map[colonne][ligne] > 5 && map[colonne][ligne] <= 10)
+                    {
+                        printf("\033[2;30m");
+                        printf("MM");
+                    }
+                    else if (map[colonne][ligne] == 101)
+                    {
+                        printf("\033[30m");
+                        printf("¤¤");
+                    }
+                    else if (map[colonne][ligne] == 216)
+                    {
+                        printf("\033[37m");
+                        printf("$$");
+                    }
+                    else
+                    {
+                        printf("  ");
+                    }
                 }
-                else if (map[colonne][ligne] > 5 && map[colonne][ligne] <= 10)
-                {
-                    printf("\033[2;30m");
-                    printf("MM");
-                }
-                else if (map[colonne][ligne] == 101)
-                {
-                    printf("\033[30m");
-                    printf("¤¤");
-                }
-                else if (map[colonne][ligne] == 216)
-                {
-                    printf("\033[37m");
-                    printf("$$");
-                }
-
-                else if (map[colonne][ligne] == -100)
-                {
-                    printf("\033[30m");
-                    printf(":o");
-                }
-                else if (map[colonne][ligne] == -101)
-                {
-                    printf("\033[30m");
-                    printf(":v");
-                }
-                else if (map[colonne][ligne] == -102)
-                {
-                    printf("\033[30m");
-                    printf("B)");
-                }
-
                 else
                 {
-                    printf("  ");
+                    if (map_unite[colonne][ligne] == -100)
+                    {
+                        printf("\033[30m");
+                        printf(":o");
+                    }
+                    else if (map_unite[colonne][ligne] == -101)
+                    {
+                        printf("\033[30m");
+                        printf(":v");
+                    }
+                    else if (map_unite[colonne][ligne] == -102)
+                    {
+                        printf("\033[30m");
+                        printf("B)");
+                    }
+                    else
+                    {
+                        printf("\033[30m");
+                        printf("  ");
+                    }
                 }
+
                 // Fin couleur + caractères
                 printf("\033[0m");
             }
