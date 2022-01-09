@@ -131,7 +131,7 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                     }
 
                     //Equipe bleue
-                    if (map_unite[colonne][ligne] == 10)
+                    else if (map_unite[colonne][ligne] == 10)
                     {
                         printf("\033[38;5;117m");
                         printf(":o");

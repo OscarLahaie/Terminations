@@ -40,7 +40,7 @@ void convert(int map[HEIGHT][WIDTH], int map_acces[HEIGHT][WIDTH], int taille)
     {
         for (int j = 0; j < taille; j++)
         {
-            map_acces[i][j] = map[i][j] >= 0 && map[i][j] < 5 ? 0 : -1;
+            map_acces[i][j] = (map[i][j] >= 0 && map[i][j] < 5) || map[i][j] == 100 || map[i][j] == 101 ? 0 : -1;
         }
     }
 }

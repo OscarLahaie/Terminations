@@ -733,12 +733,19 @@ int main(void)
                 mineur.deplacement_y = 2;
                 tab_unites[0] = mineur;
                 mineur.type = 1;
-                mineur.equipe = 1;
+                mineur.equipe = 0;
                 mineur.position_x = taille_map / 2;
                 mineur.position_y = taille_map - 3;
                 mineur.deplacement_x = taille_map / 2;
                 mineur.deplacement_y = taille_map - 3;
                 tab_unites[1] = mineur;
+                mineur.type = 1;
+                mineur.equipe = 1;
+                mineur.position_x = 5;
+                mineur.position_y = 5;
+                mineur.deplacement_x = 10;
+                mineur.deplacement_y = 10;
+                tab_unites[2] = mineur;
 
                 nb_tours = 0;
 
