@@ -40,7 +40,7 @@ void convert(int map[HEIGHT][WIDTH], int map_acces[HEIGHT][WIDTH], int taille)
     {
         for (int j = 0; j < taille; j++)
         {
-            map_acces[i][j] = (map[i][j] >= 0 && map[i][j] < 4) || map[i][j] == 100 || map[i][j] == 101 ? 0 : -1;
+            map_acces[i][j] = (map[i][j] >= 0 && map[i][j] < 5) || map[i][j] == 100 || map[i][j] == 101 ? 0 : -1;
         }
     }
 }
@@ -162,71 +162,3 @@ void chemins(int map[HEIGHT][WIDTH], Coordonnees chemin[HEIGHT * WIDTH], Coordon
         chemin[0] = fausse;
     }
 }
-/*
-int main()
-{
-
-    int map[HEIGHT][WIDTH];
-    Coordonnees chemin[HEIGHT * WIDTH] = {{0, 0}};
-
-    convert (map);
-    Coordonnees depart;
-    depart.x = 15;
-    depart.y = 10;
-    Coordonnees arrivee;
-    arrivee.x = 22;
-    arrivee.y = 22;
-    chemins(map, chemin, depart, arrivee);
-    for (int i = 0; i < HEIGHT * WIDTH; i++)
-    {
-        if (chemin[i].x != 0 && chemin[i].y != 0)
-        {
-            map[chemin[i].y][chemin[i].x] = -3;
-        }
-    }
-
-    for (int i = 0; i < HEIGHT; i++)
-    {
-        for (int j = 0; j < WIDTH; j++)
-        {
-            if (map[i][j] == -1)
-            {
-                printf("\033[0;41m");
-                printf("  ");
-            }
-            else if (map[i][j] == 0)
-            {
-                printf("\033[0;42m");
-                printf("  ");
-            }
-            else if (map[i][j] == -2)
-            {
-                printf("\033[0;42m");
-                printf("AA");
-            }
-            else if (map[i][j] == -3)
-            {
-                printf("\033[0;44m");
-                printf("  ");
-            }
-            else if (map[i][j] == 1)
-            {
-                printf("\033[0;42m");
-                printf("DD");
-            }
-            else if (map[i][j] >= 10)
-            {
-                printf("\033[0;42m");
-                printf("%d", map[i][j]);
-            }
-            else
-            {
-                printf("\033[0;42m");
-                printf(" %d", map[i][j]);
-            }
-        }
-        printf("\n");
-    }
-    printf("\n");
-    printf("\033[0;40m");
-}*/

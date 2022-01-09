@@ -13,6 +13,7 @@ Il s'agit d'un jeu dans le style de Clash Royale / Civilisation mais remanié de
 En prime, plusieurs mini-jeux développés par [@srgoti](https://github.com/srgoti) sont disponibles.
 
 #### Les mini-jeux comprennent :
+De FOULON Valentin <[@srgoti](https://github.com/srgoti)>
 - Le démineur
 - Les échecs
 - Le jeu de la vie
@@ -20,7 +21,12 @@ En prime, plusieurs mini-jeux développés par [@srgoti](https://github.com/srgo
 ## Comment compiler
 ```bash
 #!/bin/bash
-for file in *.c; do gcc -o $(basename $file .c) $file -lpthread -std=c11 -Wall -Wextra -pedantic -D _DEFAULT_SOURCE; done
+gcc main.c -o terminations -lncurses -Wall -Werror -pedantic -std=c11 map.h pathfinder.h
+./terminations
+```
+Ou pour avoir le résultat instantanément  
+```bash
+./build.sh
 ```
 
 ## Contrôles

@@ -857,7 +857,9 @@ int main(void)
                     printf("\rNombre de tours : %d\n\r", nb_tours);
                     affiche_unite(map_tmp);
                     afficher(map, map_tmp, biome, taille_map, selection, etat_move);
+                    printf("\r q : quitter , m : selectionner uniter, ' ' : selectionner l'endroit, t : passer le tour\n\r");
                 } while ((c = getchar()) != 'q');
+                printf("\r");
                 break;
                 //liaison avec le jeu
             }
@@ -865,12 +867,12 @@ int main(void)
         else if (choix == 1)
         {
             system("clear");
-            printf("Merci d'avoir joué ! \n");
+            printf("Merci d'avoir joué ! \n\r");
             break;
         }
         else if (choix == 2)
         {
-            break;
+            parametres_partie();
         }
     }
 }
