@@ -735,9 +735,9 @@ int main(void)
                 mineur.type = 1;
                 mineur.equipe = 1;
                 mineur.position_x = taille_map / 2;
-                mineur.position_y = taille_map - 2;
+                mineur.position_y = taille_map - 3;
                 mineur.deplacement_x = taille_map / 2;
-                mineur.deplacement_y = taille_map - 2;
+                mineur.deplacement_y = taille_map - 3;
                 tab_unites[1] = mineur;
 
                 nb_tours = 0;
