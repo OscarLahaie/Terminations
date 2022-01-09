@@ -44,9 +44,13 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                 {
                     printf("\033[0;43m");
                 }
+                else if (map[colonne][ligne] == 99)
+                {
+                    printf("\033[101m");
+                }
                 else if (map[colonne][ligne] == 100)
                 {
-                    printf("\033[47m");
+                    printf("\033[104m");
                 }
                 else if (map[colonne][ligne] == 101)
                 {
@@ -499,19 +503,19 @@ void desert(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
 
 void chateaux(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
 {
-    for (int hauteur = 1; hauteur <= 3; hauteur++)
+    for (int ligne = 1; ligne <= 3; ligne++)
     {
-        for (int ligne = taille / 2 - 1; ligne <= taille / 2 + 1; ligne++)
+        for (int colonne = taille / 2 - 1; colonne <= taille / 2 + 1; colonne++)
         {
-            if ((hauteur != 1 && hauteur != 3) && (ligne != taille / 2 - 1 && ligne != taille / 2 + 1))
+            if((ligne != 1 && ligne != 3) && (colonne != taille / 2 - 1 && colonne != taille / 2 + 1))
             {
-                map[hauteur][ligne] = 100;
-                map[taille - hauteur - 1][ligne] = 100;
+                map[ligne][colonne] = 100;
+                map[taille - ligne - 1][colonne] = 99;
             }
             else
             {
-                map[hauteur][ligne] = 101;
-                map[taille - hauteur - 1][ligne] = 101;
+                map[ligne][colonne] = 101;
+                map[taille - ligne - 1][colonne] = 101;
             }
         }
     }
