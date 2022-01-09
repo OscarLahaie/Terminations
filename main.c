@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
+
 #include "map.h"
 #define HEIGHT_MAX 50
 #define WIDTH_MAX 50
@@ -454,12 +455,14 @@ int afficher_menu()
 }
 
 void afficher_parametres_partie(int selection)
-
 {
     printf("\033[40m");
-    printf("\033[37m");
+    printf("\033[0;37m");
     printf("\rFleches du haut et du bas pour se déplacer et espace pour selectionner\n\n");
+
+    printf("\033[1m");
     printf("\rParamètres :\n\n");
+    printf("\033[0mNormal");
     printf("\rTaille de la carte :\n");
     for (int i = 0; i < 5; i++)
     {
@@ -589,7 +592,6 @@ int parametres_partie()
     system("/usr/bin/stty raw");
     while ((c = getchar()) != 'q')
     {
-        printf("\r\033[2K");
         system("clear");
         switch (c)
         {
@@ -657,10 +659,35 @@ int main(void)
                 {
                     desert(map, taille_map);
                 }
-                afficher(map, biome, taille_map);
+                chateaux(map, taille_map);
+                int c;
+                Coordonnees selection;
+                selection.x = 3;
+                selection.y = 3;
+                system("/usr/bin/stty raw");
+                do
+                {
+                    system("clear");
+                    switch (c)
+                    {
+                    case 'A':
+                        selection.y--;
+                        break;
+                    case 'B':
+                        selection.y++;
+                        break;
+                    case 'C':
+                        selection.x++;
+                        break;
+                    case 'D':
+                        selection.x--;
+                        break;
+                    }
+                    afficher(map, biome, taille_map, selection);
+                } while ((c = getchar()) != 'q');
                 break;
+                //liaison avec le jeu
             }
-            //liaison avec le jeu
         }
         else if (choix == 1)
         {

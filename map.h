@@ -5,8 +5,13 @@
 #include <time.h>
 #define HEIGHT_MAX 50
 #define WIDTH_MAX 50
-
-void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille)
+typedef struct Coordonnees Coordonnees;
+struct Coordonnees
+{
+    int x;
+    int y;
+};
+void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection)
 {
     if (type == 0)
     {
@@ -16,7 +21,11 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille)
             for (int ligne = 0; ligne < taille; ligne++)
             {
                 // Couleur du fond
-                if (map[colonne][ligne] < 0)
+                if (selection.x == ligne && selection.y == colonne)
+                {
+                    printf("\033[105m");
+                }
+                else if (map[colonne][ligne] < 0)
                 {
                     //Bleu foncé pour le fond de l'eau
                     printf("\033[0;44m");
@@ -35,32 +44,47 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille)
                 {
                     printf("\033[0;43m");
                 }
+                else if (map[colonne][ligne] == 100)
+                {
+                    printf("\033[47m");
+                }
+                else if (map[colonne][ligne] == 101)
+                {
+                    printf("\033[100m");
+                }
                 else
                 {
                     // Blanc pour les montagnes enneigées
                     printf("\033[0;47m");
                 }
                 // Fin couleur du fond
+
                 // Couleur + caractères
                 if (map[colonne][ligne] == 2)
                 {
                     printf("\033[2;32m");
                     printf("XX");
                 }
-                else if (map[colonne][ligne] > 5)
+                else if (map[colonne][ligne] > 5 && map[colonne][ligne] <= 10)
                 {
                     printf("\033[2;30m");
                     printf("MM");
+                }
+                else if (map[colonne][ligne] == 101)
+                {
+                    printf("\033[30m");
+                    printf("¤¤");
                 }
                 else
                 {
                     printf("  ");
                 }
                 // Fin couleur + caractères
+                printf("\033[0m");
             }
-            printf("\033[0m \n");
+            printf("\033[0m \n\r");
         }
-        printf("\033[0m\n");
+        printf("\033[0m\n\r");
     }
     else if (type == 1)
     {
@@ -103,9 +127,9 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille)
                 }
                 // Fin couleur + caractères
             }
-            printf("\033[0m \n");
+            printf("\033[0m \n\r");
         }
-        printf("\033[0m\n");
+        printf("\033[0m\n\r");
     }
     else if (type == 2)
     {
@@ -148,9 +172,9 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille)
                 }
                 // Fin couleur + caractères
             }
-            printf("\033[0m \n");
+            printf("\033[0m \n\r");
         }
-        printf("\033[0m\n");
+        printf("\033[0m\n\r");
     }
 }
 
@@ -473,27 +497,21 @@ void desert(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
     // Fin des cactus
 }
 
-void chateaux(int map[HEIGHT_MAX][WIDTH_MAX], int taille_map){
-    for(int colonne = (taille_map/2) - 4; colonne < (taille_map/2) + 5; colonne++){
-        if((colonne == (taille_map/2) - 4) && (colonne == (taille_map/2) - 2) && (colonne == (taille_map/2) + 2) && (colonne == (taille_map/2) + 4)){
-            for(int ligne = 0; ligne < 5; ligne++){
-                map[ligne][colonne] = 216;
+void chateaux(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
+{
+    for (int hauteur = 1; hauteur <= 3; hauteur++)
+    {
+        for (int ligne = taille / 2 - 1; ligne <= taille / 2 + 1; ligne++)
+        {
+            if ((hauteur != 1 && hauteur != 3) && (ligne != taille / 2 - 1 && ligne != taille / 2 + 1))
+            {
+                map[hauteur][ligne] = 100;
+                map[taille - hauteur - 1][ligne] = 100;
             }
-        }
-        if((colonne == (taille_map/2) - 3) && (colonne == (taille_map/2) + 3) && (colonne == taille_map/2)){
-            for(int ligne = 1; ligne < 4; ligne++){
-                map[ligne][colonne] = 216;
-            }
-        }
-        if((colonne == (taille_map/2) - 1) && (colonne == (taille_map/2) + 1)){
-            for(int ligne = 2; ligne < 4; ligne++){
-                map[ligne][colonne] = 216;
-            }
-        }
-
-        for(int ligne = 0; ligne < 5; ligne++){
-            if(map[ligne][colonne] == 216){
-                printf("\033[0;30m");
+            else
+            {
+                map[hauteur][ligne] = 101;
+                map[taille - hauteur - 1][ligne] = 101;
             }
         }
     }
