@@ -1,16 +1,12 @@
-/**************************************************************/
-/*                Chess - a simple chess game                 */
-/*         Made by SRGotI <fl.valentin1904@gmail.com>         */
-/* Source code on https://gitlab.com/OscarLahaie/terminations */
-/**************************************************************/
+/**************************************************/
+/*              Chess - a chess game              */
+/*   Made by SRGotI <fl.valentin1904@gmail.com>   */
+/* Source code on https://gitlab.com/srgoti/games */
+/**************************************************/
 
 // All the system("stty ...") calls control the way input is entered in the terminal
 // `stty raw` gets input from the terminal without the need to press enter
-
-// Info : I just finished the castling, it may not be working completely as intended
-
-// TODO: Add the 'en passant' move
-// TODO: Promotion of a pawn
+// cbreak() does the same for ncurses input
 
 // Needed for compilation
 #define _POSIX_C_SOURCE 200112L
@@ -25,7 +21,7 @@
 #include <sys/ioctl.h>
 // Used to print text
 #include <stdio.h>
-// TODO: Check if those are needed
+// Those are probably needed, not sure tho
 #include <unistd.h>
 #include <stdlib.h>
 // Used to compared strings
@@ -35,6 +31,9 @@
 #include <stdbool.h>
 // Used to check if a move or IP address is valid
 #include <regex.h>
+// Used to display boxes on screen
+#include <ncurses.h>
+#include <locale.h>
 
 // Define piece names
 #define KING 0
@@ -49,37 +48,22 @@
 #define WHITES 1
 
 // Define terminal colors
-#define BG_BLACK 40
-#define BG_RED 41
-#define BG_GREEN 42
-#define BG_ORANGE 43
-#define BG_BLUE 44
-#define BG_PURPLE 45
-#define BG_TEAL 46
-#define BG_WHITE 47
-
-#define FG_BLACK 30
-#define FG_RED 31
-#define FG_GREEN 32
-#define FG_ORANGE 33
-#define FG_BLUE 34
-#define FG_PURPLE 35
-#define FG_TEAL 36
-#define FG_WHITE 37
+#define BG_BLACK 0
+#define BG_RED 1
+#define BG_GREEN 2
+#define BG_YELLOW 3
+#define BG_BLUE 4
+#define BG_WHITE 5
+#define FG_BLACK 6
+#define FG_RED 7
+#define FG_GREEN 8
+#define FG_YELLOW 9
+#define FG_BLUE 10
+#define FG_WHITE 11
 
 // Define playing control mode
 #define LETTERSMODE 0
 #define ARROWSMODE 1
-
-// Define the grid, might delete later, IDK
-#define A 0
-#define B 1
-#define C 2
-#define D 3
-#define E 4
-#define F 5
-#define G 6
-#define H 7
 
 struct Struct {
 	bool allowed[2];
@@ -87,14 +71,16 @@ struct Struct {
 } en_passant;
 
 char* pieces[2][6] = {
-	{"♚", "♛", "♜", "♝", "♞", "♟"},
 	{"♔", "♕", "♖", "♗", "♘", "♙"},
+	{"♚", "♛", "♜", "♝", "♞", "♟"},
 };
 bool has_moved[3] = {false, false, false};
 char* lost_pieces[2][16] = {{""}};
 int lost_pieces_count[2] = {0};
 int lcount;
 int ccount;
+int mid_h;
+int mid_w;
 char* grid[8][8] = {{""}};
 char* grid_checkmate[8][8] = {{""}};
 int sockfd = 0;
@@ -113,9 +99,31 @@ int currentpiece[2] = {8, 8};
 int nextplayer = WHITES;
 bool promotion = false;
 int promotedpiece = 0;
-
+WINDOW* game;
+WINDOW* lost_top;
+WINDOW* lost_bottom;
+WINDOW* input;
+WINDOW* hist;
+WINDOW* status;
+int time_passed = 0;
+short COLOR_ORANGE;
 // This will be useful to print the inverted grid for the black pieces player
-int invertedbuffer[8][8] = {{0}};
+short invertedbuffer[8][8] = {{0}};
+char** history;
+bool isinmenu = false;
+
+void* timer() {
+	while (true) {
+		sleep(1);
+		time_passed += 1;
+		if (!isinmenu) {
+			wmove(status, 1, 1);
+			wprintw(status, "Chess v1, Time : %d, h : help", time_passed);
+			wrefresh(status);
+			wmove(input, 1, 1);
+		}
+	}
+}
 
 // Check if a piece is of a certain color
 bool belongs(char* piece, int color) {
@@ -201,7 +209,6 @@ bool is_move_allowed(int color, int start_y, int start_x, int finish_y, int fini
 			else if (finish_x - start_x > 0)
 				x_delta = 1; // Moving to the right
 			for (int i = 1; i < ((abs(finish_y - start_y) == 0) ? abs(finish_x - start_x) : abs(finish_y - start_y)); i++) {
-//			for (int i = 1; i < abs(finish_y - start_y); i++) {
 				if (strcmp(grid[start_y + y_delta * i][start_x + x_delta * i], " ") != 0) { // Check if any non-empty case is on the path of the queen
 					return false;
 				}
@@ -343,7 +350,7 @@ bool is_move_allowed(int color, int start_y, int start_x, int finish_y, int fini
 }
 
 // Is my king in danger RN ?
-// This super slow function shows it
+// This super unoptimized function shows it
 bool king_chess(int color) {
 	int my_king_y;
 	int my_king_x;
@@ -370,31 +377,6 @@ void clearscreen() {
 	printf("\033[1;1H\033[2J");
 }
 
-// Player asked for help
-// TODO: Install this message
-void printhelp() {
-	clearscreen();
-	printf("\rThis game is a pretty normal chess game\n");
-	printf("\rYou can move your pieces with two different methods :\n");
-	printf("\r - \033[32mCursor mode :\033[0m\n");
-	printf("\r   Move the cursor with the \033[34marrows\033[0m of your keyboard\n");
-	printf("\r   Select a piece and validate its move with \033[33mspacebar\033[0m\n");
-	printf("\r   You can cancel a move by selecting the same piece you selected before");
-	printf("\r - \033[32mDirect mode :\033[0m\n");
-	printf("\r   Note the coordinates of the piece you want to move and where to move it\n");
-	printf("\r   Write them with the format [Initial column][Initial line][Final column][Final line] without the brackets\n");
-	printf("\r   Validate your input with \033[33menter\033[0m\n");
-	printf("\rMeta : this game supports\n");
-	printf("\r - The castling :\n");
-	printf("\r   You can select the king to move to the rook\n");
-	printf("\r - En passant\n");
-	printf("\rPress \033[33mESC\033[0m to exit this help\n");
-	int c;
-	while ((c = getchar()) != 27) {}
-	clearscreen();
-}
-
-
 // User called exit, cleanup
 void doexit(int err) {
 	clearscreen();
@@ -406,39 +388,40 @@ void doexit(int err) {
 	exit(err);
 }
 
-// Print the top (status) bar
-void printbar() {
-	char* left = malloc(22);
-	sprintf(left, "Chess v1, %s player", iswhiteplayer ? "white" : "black");
-	printf("\033[30;47m%s%*s\033[0m\n", left, (int) (ccount - strlen(left)), "TEST");
-}
-
 // Display the game grid on screen
 // The grid should display the current player's pieces at the bottom
 // Hence the conditions and (1)
 void printgrid() {
 	printf("\r");
-//	printbar();
-	if (en_passant.allowed[0]) {
-		printf("En passant to black pawn\n");
+	if (gamemode != 2) {
+		werase(status);
+		box(status, 0, 0);
+		mvwprintw(status, 0, 1, "Status");
+		if (king_chess(iswhiteplayer ? WHITES : BLACKS)) {
+			wmove(status, 2, 1);
+			wattron(status, COLOR_PAIR(FG_RED));
+			wprintw(status, "Your king is in danger");
+			wattroff(status, COLOR_PAIR(FG_RED));
+		}
+		wrefresh(status);
 	}
-	if (en_passant.allowed[1]) {
-		printf("En passant to white pawn\n");
-	}
-	printf("\r");
-	if (king_chess(iswhiteplayer ? WHITES : BLACKS)) {
-		printf("\033[31mYour king is in danger\033[0m\n");
-	}
+	werase(lost_top);
+	box(lost_top, 0, 0);
+	mvwprintw(lost_top, 0, 1, "Lost pieces");
+	wmove(lost_top, 1, 1);
 	for (int i = 0; i < lost_pieces_count[iswhiteplayer ? WHITES : BLACKS]; i++) {
-		printf("%s", lost_pieces[iswhiteplayer ? WHITES : BLACKS][i]);
+		wprintw(lost_top, "%s", lost_pieces[iswhiteplayer ? WHITES : BLACKS][i]);
 		if (i == 7)
-			printf("\n\r");
+			wmove(lost_top, 2, 1);
 	}
-	printf("\n\r");
-	printf(" \033[31mABCDEFGH\033[0m\n\r");
+	wrefresh(lost_top);
+	wmove(game, 1, 2);
+	wprintw(game, "ABCDEFGH");
 	for (int i = 0; i < 8; i++) {
-		if (!iswhiteplayer)
-			printf("\033[31m%d\033[0m", i + 1);
+		if (!iswhiteplayer) {
+			wmove(game, 2 + i, 1);
+			wprintw(game, "%d", i + 1);
+		}
 		for (int j = 0; j < 8; j++) {
 			int casecolor;
 			// Use color for allowed moves
@@ -463,7 +446,7 @@ void printgrid() {
 					}
 				} else {
 					if (i == currentpiece[0] && j == currentpiece[1]) {
-						casecolor = BG_ORANGE;
+						casecolor = BG_YELLOW;
 					} else if (is_move_allowed(iswhiteplayer ? WHITES : BLACKS, currentpiece[0], currentpiece[1], i, j)) { // Player is choosing a destination to its piece
 						casecolor = BG_BLUE;
 					} else {
@@ -472,7 +455,7 @@ void printgrid() {
 				}
 			} else {
 				if (i == currentpiece[0] && j == currentpiece[1]) {
-					casecolor = BG_ORANGE;
+					casecolor = BG_YELLOW;
 				} else {
 					if (currentpiece[0] != 8 && currentpiece[1] != 8 && is_move_allowed(iswhiteplayer ? WHITES : BLACKS, currentpiece[0], currentpiece[1], i, j)) { // Show all available moves for a piece
 						casecolor = BG_GREEN;
@@ -489,7 +472,7 @@ void printgrid() {
 						if (currentpiece[0] != 8 && currentpiece[1] != 8 && is_move_allowed(iswhiteplayer ? WHITES : BLACKS, currentpiece[0], currentpiece[1], i, j)) { // Show all available moves for a piece
 							casecolor = BG_GREEN;
 						} else {
-							casecolor = 0;
+							casecolor = BG_BLACK;
 						}
 					}
 				}
@@ -497,31 +480,46 @@ void printgrid() {
 // Beginning of (1)
 			invertedbuffer[i][j] = casecolor;
 			if (!iswhiteplayer) {
-				printf("\033[%dm%s\033[0m", casecolor, grid[i][j]);
+				wmove(game, 2 + i, 2 + j);
+				wattron(game, COLOR_PAIR(casecolor));
+				wprintw(game, grid[i][j]);
+				wattroff(game, COLOR_PAIR(casecolor));
 			}
 		}
 		if (!iswhiteplayer) {
-			printf("\033[31m%d\033[0m", i + 1);
-			printf("\n\r");
+			wmove(game, 2 + i, 10);
+			wprintw(game, "%d", i + 1);
 		}
 	}
 	if (iswhiteplayer) {
 		for (int i = 7; i >= 0; i--) {
-			printf("\033[31m%d\033[0m", i + 1);
+			wmove(game, 2 + i, 1);
+			wprintw(game, "%d", 8 - i);
 			for (int j = 0; j < 8; j++) {
-				printf("\033[%dm%s\033[0m", invertedbuffer[i][j], grid[i][j]);
+				wmove(game, 9 - i, 2 + j);
+				wattron(game, COLOR_PAIR(invertedbuffer[i][j]));
+				wprintw(game, grid[i][j]);
+				wattroff(game, COLOR_PAIR(invertedbuffer[i][j]));
 			}
-			printf("\033[31m%d\033[0m", i + 1);
-			printf("\n");
+			wmove(game, 2 + i, 10);
+			wprintw(game, "%d", 8 - i);
 		}
 	}
-	printf(" \033[31mABCDEFGH\033[0m\n\r");
+	wmove(game, 10, 2);
+	wprintw(game, "ABCDEFGH");
+	wrefresh(game);
 // End of (1)
+
+	werase(lost_bottom);
+	box(lost_bottom, 0, 0);
+	mvwprintw(lost_bottom, 0, 1, "Won pieces");
+	wmove(lost_bottom, 1, 1);
 	for (int i = 0; i < lost_pieces_count[iswhiteplayer ? BLACKS : WHITES]; i++) {
-		printf("%s", lost_pieces[iswhiteplayer ? BLACKS : WHITES][i]);
+		wprintw(lost_bottom, "%s", lost_pieces[iswhiteplayer ? BLACKS : WHITES][i]);
 		if (i == 7)
-			printf("\n\r");
+			wmove(lost_bottom, 2, 1);
 	}
+	wrefresh(lost_bottom);
 }
 
 // Client connect code
@@ -581,7 +579,6 @@ void startserver() {
 	socklen_t addr_size = sizeof(server);
 	memset(&server, 0, sizeof(server));
 
-//	ioctl(sockfd, SIOCGIFCONF, (struct ifconf)&buffer);
 	printf("\rWaiting for someone to connect, IP addresses of this pc:\n");
 	system("if command -v ip >/dev/null 2>&1; then list=$(for line in $(ip route show); do echo $line; done | grep -A 2 src | grep 192.168) && for elem in $list; do echo -e \033[32m$elem\033[0m; done; else echo -e \033[31mcommand `ip` not installed\033[0m; fi");
 	sockfd = accept(new_fd, (struct sockaddr *) &client, &addr_size);
@@ -601,11 +598,11 @@ void startserver() {
 	int player_pos = 0;
 	for (int i = 0; i < 2; i++) {
 		if (player_pos == i) {
-			bgcolor = FG_WHITE;
+			bgcolor = 30;
 			fgcolor = BG_RED;
 		} else {
 			bgcolor = BG_WHITE;
-			fgcolor = FG_RED;
+			fgcolor = 35;
 		}
 		printf("\r\033[%d;%dm%s\033[0m\n", fgcolor, bgcolor, list[i]);
 	}
@@ -629,11 +626,11 @@ void startserver() {
 		printf("\033[2K");
 		for (int i = 0; i < 2; i++) {
 			if (player_pos == i) {
-				bgcolor = FG_WHITE;
+				bgcolor = 30;
 				fgcolor = BG_RED;
 			} else {
 				bgcolor = BG_WHITE;
-				fgcolor = FG_RED;
+				fgcolor = 35;
 			}
 			printf("\r\033[%d;%dm%s\n\033[0m", fgcolor, bgcolor, list[i]);
 		}
@@ -669,11 +666,11 @@ void startaskserver() {
 	int fgcolor = 0;
 	for (int i = 0; i < 2; i++) {
 		if (player_pos == i) {
-			bgcolor = FG_WHITE;
+			bgcolor = 30;
 			fgcolor = BG_RED;
 		} else {
 			bgcolor = BG_WHITE;
-			fgcolor = FG_RED;
+			fgcolor = 35;
 		}
 		printf("\r\033[%d;%dm%s\033[0m\n", fgcolor, bgcolor, list[i]);
 	}
@@ -697,11 +694,11 @@ void startaskserver() {
 		printf("\033[2K");
 		for (int i = 0; i < 2; i++) {
 			if (player_pos == i) {
-				bgcolor = FG_WHITE;
+				bgcolor = 30;
 				fgcolor = BG_RED;
 			} else {
 				bgcolor = BG_WHITE;
-				fgcolor = FG_RED;
+				fgcolor = 35;
 			}
 			printf("\r\033[%d;%dm%s\n\033[0m", fgcolor, bgcolor, list[i]);
 		}
@@ -720,10 +717,65 @@ void startaskserver() {
 	}
 }
 
+
+// Player asked for help
+void printhelp() {
+	isinmenu = true;
+	erase();
+	printw("\rThis game is a pretty normal chess game\n");
+	printw("\rYou can move your pieces with two different methods :\n");
+	printw("\r - \033[32mCursor mode :\033[0m\n");
+	printw("\r   Move the cursor with the \033[34marrows\033[0m of your keyboard\n");
+	printw("\r   Select a piece and validate its move with \033[33mspacebar\033[0m\n");
+	printw("\r   You can cancel a move by selecting the same piece you selected before");
+	printw("\r - \033[32mDirect mode :\033[0m\n");
+	printw("\r   Note the coordinates of the piece you want to move and where to move it\n");
+	printw("\r   Write them with the format [Initial column][Initial line][Final column][Final line] without the brackets\n");
+	printw("\r   Validate your input with \033[33menter\033[0m\n");
+	printw("\rMeta : this game supports\n");
+	printw("\r - The castling :\n");
+	printw("\r   You can select the king to move to the rook\n");
+	printw("\r - En passant\n");
+	printw("\rPress \033[33mESC\033[0m to exit this help\n");
+	refresh();
+	int c;
+	while ((c = getch()) != 27) {}
+	erase();
+	refresh();
+	box(status, 0, 0);
+	box(input, 0, 0);
+	box(game, 0, 0);
+	box(lost_top, 0, 0);
+	box(lost_bottom, 0, 0);
+	mvwprintw(status, 0, 1, "Status");
+	mvwprintw(game, 0, 1, "Grid");
+	mvwprintw(input, 0, 1, "Input");
+	mvwprintw(lost_bottom, 0, 1, "Won pieces");
+	mvwprintw(lost_top, 0, 1, "Lost pieces");
+	box(hist, 0, 0);
+	mvwprintw(hist, 0, 1, "History");
+	for (int i = 0; i < lcount - 6; i++) {
+		if (strcmp(history[i], "    ") != 0) {
+			mvwprintw(hist, 1 + i, 1, "%c", history[i][0]);
+			mvwprintw(hist, 1 + i, 2, "%d", 9 - (int) (history[i][1] - '0'));
+			mvwprintw(hist, 1 + i, 3, "%c", history[i][2]);
+			mvwprintw(hist, 1 + i, 4, "%d", 9 - (int) (history[i][3] - '0'));
+		}
+	}
+	wrefresh(hist);
+	isinmenu = false;
+}
+
+
 // Wait for any playing event
 void waitforevent() {
 	char* usermove = malloc(4 * sizeof(char));
 	while (true) {
+		werase(input);
+		box(input, 0, 0);
+		mvwprintw(input, 0, 1, "Input");
+		wmove(input, 1, 1);
+		wrefresh(input);
 		promotion = false;
 		int mycolor = iswhiteplayer ? WHITES : BLACKS;
 		en_passant.allowed[mycolor] = false;
@@ -731,7 +783,8 @@ void waitforevent() {
 		skipturn = false;
 		if (sockfd != 0 && !iswhiteplayer && firstmove == 0) {
 			// If we are not white player and in lan, wait for the other player to start
-			printf("\033[A\033[2K\r\033[31mWaiting for other player\033[0m\n\033[2K");
+			wprintw(input, "Waiting for other player");
+			wrefresh(input);
 			char* otherguymove = malloc(4 * sizeof(char));
 			recv(sockfd, otherguymove, 4, 0);
 			if (strcmp(otherguymove, "QUIT") == 0) { // The other player quit, exit now
@@ -752,35 +805,74 @@ void waitforevent() {
 			strcpy(grid[next[0]][next[1]], grid[prev[0]][prev[1]]);
 			grid[prev[0]][prev[1]] = malloc(strlen(" "));
 			strcpy(grid[prev[0]][prev[1]], " ");
-			free(otherguymove);
 			firstmove = 1;
+			// Display the history on the right
+			int last_available = -1;
+			for (int i = 0; i < lcount - 6; i++) {
+				// Get if the history array has an empty line
+				if (strcmp(history[i], "    ") == 0) {
+					last_available = i;
+					break;
+				}
+			}
+			if (last_available == -1) { // The array is full
+				for (int i = 1; i < lcount - 6; i++) { // Move every line of the array backwards
+					history[i - 1] = malloc(4 * sizeof(char));
+					for (int j =  0; j < 4; j++) {
+						history[i - 1][j] = ' ';
+						history[i - 1][j] = history[i][j];
+					}
+				}
+				history[lcount - 7] = malloc(4 * sizeof(char));
+				// Append the last move to the end of the array
+				for (int i = 0; i < 4; i++) {
+					history[lcount - 7][i] = ' ';
+					history[lcount - 7][i] = otherguymove[i];
+				}
+			} else { // Just add the last move at the first free spot
+				history[last_available] = malloc(4 * sizeof(char));
+				for (int i = 0; i < 4; i++) {
+					history[last_available][i] = ' ';
+					history[last_available][i] = otherguymove[i];
+				}
+			}
+			werase(hist);
+			box(hist, 0, 0);
+			mvwprintw(hist, 0, 1, "History");
+			for (int i = 0; i < lcount - 6; i++) {
+				if (strcmp(history[i], "    ") != 0) {
+					mvwprintw(hist, 1 + i, 1, "%c", history[i][0]);
+					mvwprintw(hist, 1 + i, 2, "%d", 9 - (int) (history[i][1] - '0'));
+					mvwprintw(hist, 1 + i, 3, "%c", history[i][2]);
+					mvwprintw(hist, 1 + i, 4, "%d", 9 - (int) (history[i][3] - '0'));
+				}
+			}
+			wrefresh(hist);
+			free(otherguymove);
 		} else {
-			printf("\r\n\033[32mYour turn to play\033[0m\n");
+			mvwprintw(input, 1, 1, "Your turn to play");
+			wrefresh(input);
 			if (keyboardmode == LETTERSMODE) { // In this mode, player moves by entering grid values, e.g : B1C3 on the first turn will move the white left knight to the C3 case
 				int prev[2] = {8, 8};
 				int next[2] = {8, 8};
 				system("/usr/bin/stty cooked");
 				while (strcmp(usermove, "WAIT") != 0 && ((prev[0] == 8 && prev[1] == 8 && next[0] == 8 && next[1] == 8) || !is_move_allowed(iswhiteplayer ? WHITES : BLACKS, prev[0], prev[1], next[0], next[1]))) {
 					if (prev[0] != 8 && prev[1] != 8 && next[0] != 8 && next[1] != 8) {
-						printf(is_move_allowed(iswhiteplayer ? WHITES : BLACKS, prev[0], prev[1], next[0], next[1]) ? "TRUE\n" : "FALSE\n");
-						printf("%d %d %d %d\n", prev[0], prev[1], next[0], next[1]);
+						werase(input);
+						box(input, 0, 0);
+						mvwprintw(input, 0, 1, "Input");
+						wattron(input, COLOR_PAIR(FG_RED));
+						mvwprintw(input, 2, 1, "Invalid move");
+						wattroff(input, COLOR_PAIR(FG_RED));
+						wrefresh(input);
 						sleep(2);
-						printf("\r\033[A\033[2K");
-						printf("\033[31mInvalid move\033[0m\n");
-						sleep(2);
-						printf("\r\033[A\033[2K");
+						mvwprintw(input, 1, 1, "Your turn to play");
 					}
-					printf("\rEnter input (B1C3 style) > ");
+					mvwprintw(input, 2, 1, "Enter input (B1C3 style) > ");
+					wrefresh(input);
 					scanf("%s", usermove);
-					if (strcmp(usermove, "m") == 0) { // User changes playing mode, inform the other player and skip this loop
-						keyboardmode = ARROWSMODE;
+					if (strcmp(usermove, "h") == 0) {
 						usermove = "WAIT";
-//						if (sockfd != 0)
-//							send(sockfd, usermove, 4, 0);
-					} else if (strcmp(usermove, "h") == 0) {
-						usermove = "WAIT";
-//						if (sockfd != 0)
-//							send(sockfd, usermove, 4, 0);
 						printhelp();
 					} else if (strcmp(usermove, "q") == 0) { // Player quits, send the info to the other player
 						usermove = "QUIT";
@@ -791,16 +883,22 @@ void waitforevent() {
 						regex_t regex;
 						regcomp(&regex, "[A-H][1-8][A-H][1-8]", 0);
 						while (regexec(&regex, usermove, 0, NULL, 0) != 0) { // Check if the input is valid according to regex
-							printf("\033[A");
-							printf("\r\033[2KInvalid move\n");
+							werase(input);
+							box(input, 0, 0);
+							mvwprintw(input, 0, 1, "Input");
+							wattron(input, COLOR_PAIR(FG_RED));
+							mvwprintw(input, 2, 1, "Invalid move");
+							wattroff(input, COLOR_PAIR(FG_RED));
+							wrefresh(input);
 							sleep(2);
-							printf("\033[A");
-							printf("\rEnter input (B1C3 style) > ");
+							werase(input);
+							box(input, 0, 0);
+							mvwprintw(input, 0, 1, "Input");
+							mvwprintw(input, 2, 1, "Enter input (B1C3 style) > ");
+							mvwprintw(input, 1, 1, "Your turn to play");
+							wrefresh(input);
 							scanf("%s", usermove);
-							if (strcmp(usermove, "m") == 0) {
-								keyboardmode = ARROWSMODE;
-								usermove = "WAIT";
-							} else if (strcmp(usermove, "h") == 0) {
+							if (strcmp(usermove, "h") == 0) {
 								usermove = "WAIT";
 								printhelp();
 							} else if (strcmp(usermove, "q") == 0) { // Player quits, send the info to the other player
@@ -900,7 +998,6 @@ void waitforevent() {
 						strcpy(grid[prev[0]][prev[1]], " ");
 					}
 					if (strcmp(grid[next[0]][next[1]], pieces[1 - color][PAWN]) == 0 && next[0] == (iswhiteplayer ? 7 : 0)) {
-						// TODO: Promotion
 						printf("\rPromoted, you can change your pawn to something else :\n");
 						printf("\r1) Queen\n");
 						printf("\r2) Rook\n");
@@ -925,11 +1022,13 @@ void waitforevent() {
 					}
 				}
 			} else { // Playing in arrows mode : player moves the cursor with arrows and confirms with spacebar
-				printf("\rEnter input (arrows style) > ");
-				system("/usr/bin/stty raw");
+				mvwprintw(input, 2, 1, "Enter input (arrows style) > ");
+				cbreak();
+				wmove(input, 1, 1);
 				int c;
-				c = getchar();
+				c = wgetch(input);
 				switch(c) {
+					case KEY_DOWN:
 					case 'B':
 						if (!iswhiteplayer) {
 							if (cursor_pos_y != 7)
@@ -939,6 +1038,7 @@ void waitforevent() {
 								cursor_pos_y--;
 						}
 						break;
+					case KEY_UP:
 					case 'A':
 						if (!iswhiteplayer) {
 							if (cursor_pos_y != 0)
@@ -948,10 +1048,12 @@ void waitforevent() {
 								cursor_pos_y++;
 						}
 						break;
+					case KEY_RIGHT:
 					case 'C':
 						if (cursor_pos_x != 7)
 							cursor_pos_x++;
 						break;
+					case KEY_LEFT:
 					case 'D':
 						if (cursor_pos_x != 0)
 							cursor_pos_x--;
@@ -962,6 +1064,7 @@ void waitforevent() {
 							send(sockfd, usermove, 4, 0);
 						doexit(0);
 						break;
+					case KEY_ENTER:
 					case ' ':
 						if (currentpiece[0] == 8 && currentpiece[1] == 8) {
 							// Allow playing a piece only if it has available moves
@@ -976,12 +1079,10 @@ void waitforevent() {
 							if (movecount != 0) {
 								currentpiece[0] = cursor_pos_y;
 								currentpiece[1] = cursor_pos_x;
-//								firstpart += cursor_pos_y * 1000 + cursor_pos_x * 100;
 							}
 						} else {
 							int color = (iswhiteplayer ? WHITES : BLACKS);
 							if (currentpiece[0] == cursor_pos_y && currentpiece[1] == cursor_pos_x) {
-//								firstpart = 0;
 								currentpiece[0] = 8;
 								currentpiece[1] = 8;
 							} else if (is_move_allowed(color, currentpiece[0], currentpiece[1], cursor_pos_y, cursor_pos_x)) {
@@ -1011,7 +1112,6 @@ void waitforevent() {
 									en_passant.allowed[color] = true;
 									en_passant.col[color] = currentpiece[1];
 								}
-//								firstpart += cursor_pos_y * 10 + cursor_pos_x;
 								sendpacket = true;
 								usermove[0] = (char) (currentpiece[1] + 65);
 								usermove[1] = (char) (7 - currentpiece[0] + 49);
@@ -1072,7 +1172,6 @@ void waitforevent() {
 									strcpy(grid[currentpiece[0]][currentpiece[1]], " ");
 								}
 								if (strcmp(grid[cursor_pos_y][cursor_pos_x], pieces[1 - color][PAWN]) == 0 && cursor_pos_y == (iswhiteplayer ? 7 : 0)) {
-									// TODO: Promotion
 									printf("\rPromoted, you can change your pawn to something else :\n");
 									printf("\r1) Queen\n");
 									printf("\r2) Rook\n");
@@ -1100,23 +1199,64 @@ void waitforevent() {
 							}
 						}
 						break;
-					case 'm':
-						firstpart = 0;
-						keyboardmode = LETTERSMODE;
-						break;
 					case 'h':
 						printhelp();
 						break;
 					default:
 						break;
 				}
-				system("/usr/bin/stty cooked");
+				nocbreak();
 			}
 		}
-		clearscreen();
+		if (sendpacket) {
+			// Display the history on the right
+			int last_available = -1;
+			for (int i = 0; i < lcount - 6; i++) {
+				// Get if the history array has an empty line
+				if (strcmp(history[i], "    ") == 0) {
+					last_available = i;
+					break;
+				}
+			}
+			if (last_available == -1) { // The array is full
+				for (int i = 1; i < lcount - 6; i++) { // Move every line of the array backwards
+					history[i - 1] = malloc(4 * sizeof(char));
+					for (int j =  0; j < 4; j++) {
+						history[i - 1][j] = ' ';
+						history[i - 1][j] = history[i][j];
+					}
+				}
+				history[lcount - 7] = malloc(4 * sizeof(char));
+				// Append the last move to the end of the array
+				for (int i = 0; i < 4; i++) {
+					history[lcount - 7][i] = ' ';
+					history[lcount - 7][i] = usermove[i];
+				}
+			} else { // Just add the last move at the first free spot
+				history[last_available] = malloc(4 * sizeof(char));
+				for (int i = 0; i < 4; i++) {
+					history[last_available][i] = ' ';
+					history[last_available][i] = usermove[i];
+				}
+			}
+			werase(hist);
+			box(hist, 0, 0);
+			mvwprintw(hist, 0, 1, "History");
+			for (int i = 0; i < lcount - 6; i++) {
+				if (strcmp(history[i], "    ") != 0) {
+					mvwprintw(hist, 1 + i, 1, "%c", history[i][0]);
+					mvwprintw(hist, 1 + i, 2, "%d", 9 - (int) (history[i][1] - '0'));
+					mvwprintw(hist, 1 + i, 3, "%c", history[i][2]);
+					mvwprintw(hist, 1 + i, 4, "%d", 9 - (int) (history[i][3] - '0'));
+				}
+			}
+			wrefresh(hist);
+		}
 		printgrid();
+		wrefresh(input);
 		if (sockfd != 0 && sendpacket) { // Receiving input from the other player
-			printf("\033[A\033[2K\r\033[31mWaiting for other player\033[0m\n\033[2K");
+			mvwprintw(input, 1, 1, "Waiting for other player");
+			wrefresh(input);
 			char* otherguymove = malloc(4 * sizeof(char));
 			recv(sockfd, otherguymove, 4, 0);
 			if (strcmp(otherguymove, "QUIT") == 0) { // The other player quit, exit now
@@ -1132,13 +1272,14 @@ void waitforevent() {
 			}
 			sendpacket = false;
 			int color = iswhiteplayer ? WHITES : BLACKS;
+			// Parse string to ints
 			int prev[2] = {8 - (otherguymove[1] - '0'), (int) (otherguymove[0]) - 65};
 			int next[2] = {8 - (otherguymove[3] - '0'), (int) (otherguymove[2]) - 65};
 			if (belongs(grid[next[0]][next[1]], color)) {
 				lost_pieces[color][lost_pieces_count[color]] = grid[next[0]][next[1]];
 				lost_pieces_count[color] += 1;
 			}
-			if (strcmp(grid[prev[0]][prev[1]], pieces[1 - color][PAWN]) == 0 && abs(prev[0] - next[0]) == 2) { // En passant
+			if (strcmp(grid[prev[0]][prev[1]], pieces[1 - color][PAWN]) == 0 && abs(prev[0] - next[0]) == 2) { // Pawn moved 2 cases, allow en passant
 				en_passant.allowed[1 - color] = true;
 				en_passant.col[1 - color] = prev[1];
 			}
@@ -1200,18 +1341,159 @@ void waitforevent() {
 				grid[next[0]][next[1]] = malloc(strlen(pieces[1 - color][promotedpiece]));
 				strcpy(grid[next[0]][next[1]], pieces[1 - color][promotedpiece]);
 			}
-			free(otherguymove);
-			clearscreen();
 			printgrid();
+			wrefresh(game);
+			// Display the history on the right
+			int last_available = -1;
+			for (int i = 0; i < lcount - 6; i++) {
+				// Get if the history array has an empty line
+				if (strcmp(history[i], "    ") == 0) {
+					last_available = i;
+					break;
+				}
+			}
+			if (last_available == -1) { // The array is full
+				for (int i = 1; i < lcount - 6; i++) { // Move every line of the array backwards
+					history[i - 1] = malloc(4 * sizeof(char));
+					for (int j =  0; j < 4; j++) {
+						history[i - 1][j] = ' ';
+						history[i - 1][j] = history[i][j];
+					}
+				}
+				history[lcount - 7] = malloc(4 * sizeof(char));
+				// Append the last move to the end of the array
+				for (int i = 0; i < 4; i++) {
+					history[lcount - 7][i] = ' ';
+					history[lcount - 7][i] = otherguymove[i];
+				}
+			} else { // Just add the last move at the first free spot
+				history[last_available] = malloc(4 * sizeof(char));
+				for (int i = 0; i < 4; i++) {
+					history[last_available][i] = ' ';
+					history[last_available][i] = otherguymove[i];
+				}
+			}
+			werase(hist);
+			box(hist, 0, 0);
+			mvwprintw(hist, 0, 1, "History");
+			for (int i = 0; i < lcount - 6; i++) {
+				if (strcmp(history[i], "    ") != 0) {
+					mvwprintw(hist, 1 + i, 1, "%c", history[i][0]);
+					mvwprintw(hist, 1 + i, 2, "%d", 9 - (int) (history[i][1] - '0'));
+					mvwprintw(hist, 1 + i, 3, "%c", history[i][2]);
+					mvwprintw(hist, 1 + i, 4, "%d", 9 - (int) (history[i][3] - '0'));
+				}
+			}
+			wrefresh(hist);
+			free(otherguymove);
 		}
+		sendpacket = false;
 	}
 }
 
-void start(int mode) {
+// Show the user how to play
+void tutorial(int argc, char* argv[]) {
+	printgrid();
+	refresh();
+	printgrid();
+	wrefresh(input);
+	wrefresh(status);
+	wrefresh(hist);
+	wrefresh(game);
+	refresh();
+	pthread_t t;
+	pthread_create(&t, NULL, timer, NULL);
+	attron(COLOR_PAIR(FG_GREEN));
+	char* msg0 = "Up here is the status bar, it shows you the time spent in the game";
+	mvprintw(4, 0, msg0);
+	refresh();
+	getchar();
+	for (int i = 0; i < strlen(msg0); i++) {
+		refresh();
+		mvprintw(4, i, " ");
+		refresh();
+	}
+	char* msg1 = "Down is the main playing area, this is where the game happens";
+	mvprintw(mid_h - 12, mid_w - strlen(msg1) / 2, msg1);
+	refresh();
+	getchar();
+	for (int i = 0; i < strlen(msg1); i++) {
+		mvprintw(mid_h - 12, mid_w - strlen(msg1) / 2 + i, " ");
+	}
+	char* msg2 = "This is the input area, where you will enter the move you want to play";
+	mvprintw(lcount - 5, 0, msg2);
+	refresh();
+	getchar();
+	for (int i = 0; i < strlen(msg2); i++) {
+		mvprintw(lcount - 5, i, " ");
+	}
+	char* msg3 = "This is the history bar, it will show you the history of moves";
+	mvprintw(4, ccount - 20 - strlen(msg3), msg3);
+	refresh();
+	getchar();
+	for (int i = 0; i < strlen(msg3); i++) {
+		mvprintw(4, ccount - 20 - strlen(msg3) + i, " ");
+	}
+	char* msg4 = "Now let's talk about the rules";
+	isinmenu = true;
+	erase();
+	refresh();
+	printgrid();
+	wrefresh(game);
+	mvprintw(0, 0, msg4);
+	mvprintw(1, 0, "Your objective is to eat the king of the opposite color");
+	refresh();
+	getchar();
+	erase();
+	refresh();
+	printgrid();
+	wrefresh(game);
+	char* msg5 = "How to do so ? You have pieces with special moves";
+	mvprintw(0, 0, msg5);
+	mvprintw(1, 0, "- The pawn (all characters in lines 2 and 7) can move 1 up, or 1 up and 1 to the side to eat another piece, or 2 up if it has never moved before");
+	mvprintw(2, 0, "- The rook (A1, H1, A8, H8) can move horizontally or vertically any number of cases but cannot go past another piece");
+	mvprintw(3, 0, "- The knight (B1, G1, B8, G8) can move 1 horizontally and 2 vertically or 2 horizontally and 1 vertically");
+	mvprintw(4, 0, "- The bishop (C1, F1, C8, F8) can move diagonally any number of cases but cannot go past another piece");
+	mvprintw(5, 0, "- The queen (D1, D8) can move vertically and/or horizontally any number of cases but cannot go past another piece");
+	mvprintw(6, 0, "- The king (E1, E8) can move 1 case around him");
+	refresh();
+	getchar();
+	erase();
+	refresh();
+	printgrid();
+	wrefresh(game);
+	char* msg6 = "Special moves, under certain conditions";
+	mvprintw(0, 0, msg6);
+	mvprintw(1, 0, "- If the king and a rook haved never moved during the game &");
+	mvprintw(2, 0, "If the king is not in danger &");
+	mvprintw(3, 0, "If every case between the king and the rook is empty and not in danger, ");
+	mvprintw(4, 0, "Then, the king can move just next to the rook and the rook moves past the king at his new position");
+	mvprintw(5, 0, "- If the opposite player moves his pawn 2 up &");
+	mvprintw(6, 0, "If your pawn is just next its new position,");
+	mvprintw(7, 0, "Then you can eat it by going diagonal (as if the opposite player only moved it 1 up)");
+	mvprintw(8, 0, "- If your pawn reaches the last line of the board,");
+	mvprintw(9, 0, "Then you can change it for whatever other piece you want");
+	refresh();
+	getchar();
+	erase();
+	mvprintw(0, 0, "Now that you know everything, good luck");
+	refresh();
+	getchar();
+	clearscreen();
+	erase();
+	// Relaunch the game when finished
+	char* args[] = {argv[0], NULL};
+	execvp(args[0],args);
+	doexit(0);
+}
+
+void start(int mode, int argc, char* argv[]) {
 	switch(mode) {
 		case 2:
-			gamemode = 2; // Against the 'AI' mode
-//			startagainstai();
+			gamemode = 2; // This is the tutorial
+			tutorial(argc, argv);
+			clearscreen();
+			doexit(0);
 			break;
 		case 0:
 			gamemode = 1; // Local multiplayer mode
@@ -1223,6 +1505,14 @@ void start(int mode) {
 		default:
 			break;
 	}
+	pthread_t time;
+	pthread_create(&time, NULL, timer, NULL);
+	wrefresh(status);
+	wrefresh(game);
+	wrefresh(lost_top);
+	wrefresh(lost_bottom);
+	wrefresh(input);
+	wrefresh(hist);
 	printgrid();
 	// Starting game
 	waitforevent();
@@ -1236,17 +1526,17 @@ int menu() {
 	printf("How would you like to play ? Use \033[32marrow keys\033[0m to move and press \033[34mspace\033[0m to validate\n");
 	char* c1 = "Play with a friend (on this machine)";
 	char* c2 = "Play with a friend (over the network)";
-	char* c3 = "Play agaisnt the computer (not working currently)";
+	char* c3 = "Learn how to play";
 	char* list[3] = {c1, c2, c3};
 	int bgcolor = 0;
 	int fgcolor = 0;
 	for (int i = 0; i < 3; i++) {
 		if (player_pos == i) {
-			bgcolor = FG_WHITE;
+			bgcolor = 30;
 			fgcolor = BG_RED;
 		} else {
 			bgcolor = BG_WHITE;
-			fgcolor = FG_RED;
+			fgcolor = 35;
 		}
 		printf("\r\033[%d;%dm%s\033[0m\n", fgcolor, bgcolor, list[i]);
 	}
@@ -1270,11 +1560,11 @@ int menu() {
 		printf("\033[2K");
 		for (int i = 0; i < 3; i++) {
 			if (player_pos == i) {
-				bgcolor = FG_WHITE;
+				bgcolor = 30;
 				fgcolor = BG_RED;
 			} else {
 				bgcolor = BG_WHITE;
-				fgcolor = FG_RED;
+				fgcolor = 35;
 			}
 			printf("\r\033[%d;%dm%s\n\033[0m", fgcolor, bgcolor, list[i]);
 		}
@@ -1284,7 +1574,68 @@ int menu() {
 	return player_pos;
 }
 
-int main () {
+// User chooses the input mode
+void select_playing_mode(int argc, char* argv[]) {
+	clearscreen();
+	int player_pos = 0;
+	printf("How would you like to control your inputs ? Use \033[32marrow keys\033[0m to move and press \033[34mspace\033[0m to validate\n");
+	char* c1 = "Play with arrow keys";
+	char* c2 = "Enter B1C3 style moves";
+	char* list[2] = {c1, c2};
+	int bgcolor = 0;
+	int fgcolor = 0;
+	for (int i = 0; i < 2; i++) {
+		if (player_pos == i) {
+			bgcolor = 30;
+			fgcolor = BG_RED;
+		} else {
+			bgcolor = BG_WHITE;
+			fgcolor = 35;
+		}
+		printf("\r\033[%d;%dm%s\033[0m\n", fgcolor, bgcolor, list[i]);
+	}
+	printf("\r");
+	system("/usr/bin/stty raw");
+	int c;
+	while ((c = getchar()) != ' ') {
+		printf("\033[2K\033[A\033[2K\033[A");
+		switch(c) {
+			case 'B':
+				if (player_pos != 1)
+					player_pos++;
+				break;
+			case 'A':
+				if (player_pos != 0)
+					player_pos--;
+				break;
+			default:
+				break;
+		}
+		printf("\033[2K");
+		for (int i = 0; i < 2; i++) {
+			if (player_pos == i) {
+				bgcolor = 30;
+				fgcolor = BG_RED;
+			} else {
+				bgcolor = BG_WHITE;
+				fgcolor = 35;
+			}
+			printf("\r\033[%d;%dm%s\n\033[0m", fgcolor, bgcolor, list[i]);
+		}
+		printf("\r");
+	}
+	system("/usr/bin/stty cooked");
+	keyboardmode = 1 - player_pos;
+	// Do not show cursor position on B1C3 style input
+	if (keyboardmode == LETTERSMODE) {
+		cursor_pos_x = 8;
+		cursor_pos_y = 8;
+	}
+	start(menu(), argc, argv);
+}
+
+int main (int argc, char* argv[]) {
+	setlocale(LC_ALL, "");
 	// Ugly way of having a global initial grid
     const char* grid2[8][8] = {
 		{pieces[WHITES][ROOK], pieces[WHITES][KNIGHT], pieces[WHITES][BISHOP], pieces[WHITES][QUEEN], pieces[WHITES][KING], pieces[WHITES][BISHOP], pieces[WHITES][KNIGHT], pieces[WHITES][ROOK]},
@@ -1299,7 +1650,7 @@ int main () {
 	memcpy(&grid, &grid2, sizeof(grid));
 	clearscreen();
 
-	printf("This game is best played with a big font, you should resize your terminal font with \033[%dmCtrl+Shift++\033[0m\nPress \033[%dmEnter\033[0m when you are ready\n", 32, 34);
+	printf("\rThis game is best played with a big font, you should resize your terminal font with \033[32mCtrl+Shift++\033[0m\n\rPress any key when you are ready\n");
 	getchar();
 
 	// Get the size of the terminal
@@ -1307,9 +1658,54 @@ int main () {
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	lcount = w.ws_row;
 	ccount = w.ws_col;
+	char* move_str = "    ";
+	history = malloc((lcount - 6) * sizeof(move_str));
+	for (int i = 0; i < lcount - 6; i++) {
+		history[i] = malloc(4 * sizeof(char));
+		strcpy(history[i], move_str);
+	}
+	mid_h = (lcount % 2 == 0 ? lcount / 2 : (lcount + 1) / 2);
+	mid_w = (ccount % 2 == 0 ? ccount / 2 : (ccount + 1) / 2);
+	initscr();
+	// Allow the use of arrow keys
+	keypad(stdscr, TRUE);
+	start_color();
+	// Define color pairs
+	init_pair(BG_BLACK, COLOR_BLACK, COLOR_BLACK);
+	init_pair(BG_BLUE, COLOR_BLACK, COLOR_BLUE);
+	init_pair(BG_RED, COLOR_BLACK, COLOR_RED);
+	init_pair(BG_GREEN, COLOR_BLACK, COLOR_GREEN);
+	init_pair(BG_YELLOW, COLOR_BLACK, COLOR_YELLOW);
+	init_pair(BG_WHITE, COLOR_BLACK, COLOR_WHITE);
+	init_pair(FG_BLACK, COLOR_BLACK, COLOR_BLACK);
+	init_pair(FG_BLUE, COLOR_BLUE, COLOR_BLACK);
+	init_pair(FG_RED, COLOR_RED, COLOR_BLACK);
+	init_pair(FG_GREEN, COLOR_GREEN, COLOR_BLACK);
+	init_pair(FG_YELLOW, COLOR_YELLOW, COLOR_BLACK);
+	init_pair(FG_WHITE, COLOR_WHITE, COLOR_BLACK);
+	// Define the game HUD
+	status = newwin(4, ccount, 0, 0);
+	game = newwin(12, 12, mid_h - 6, mid_w - 6);
+	lost_top = newwin(4, 12, mid_h - 10, mid_w - 6);
+	lost_bottom = newwin(4, 12, mid_h + 6, mid_w - 6);
+	input = newwin(4, ccount - 20, lcount - 4, 0);
+	hist = newwin(lcount - 4, 20, 4, ccount - 20);
+	// Display a rectangle around each window
+	box(status, 0, 0);
+	box(game, 0, 0);
+	box(lost_top, 0, 0);
+	box(lost_bottom, 0, 0);
+	box(input, 0, 0);
+	box(hist, 0, 0);
+	// Title for the boxes
+	mvwprintw(status, 0, 1, "Status bar");
+	mvwprintw(game, 0, 1, "Grid");
+	mvwprintw(lost_top, 0, 1, "Lost pieces");
+	mvwprintw(lost_bottom, 0, 1, "Won pieces");
+	mvwprintw(input, 0, 1, "Input");
+	mvwprintw(hist, 0, 1, "History");
 
-	int mode = menu();
-	start(mode);
+	select_playing_mode(argc, argv);
 
 	// Close the sockets if we were playing online
 	if (sockfd != 0)
