@@ -27,7 +27,7 @@ struct Unites
     int equipe;
 };
 #endif
-void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection)
+void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int int type, int taille, Coordonnees selection)
 {
     if (type == 0)
     {
@@ -98,6 +98,11 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                 {
                     printf("\033[30m");
                     printf("¤¤");
+                }
+                else if (map[colonne][ligne] == 216)
+                {
+                    printf("\033[37m");
+                    printf("$$");
                 }
                 else
                 {
@@ -521,19 +526,27 @@ void desert(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
     // Fin des cactus
 }
 
-void events(int map[HEIGHT_MAX][WIDTH_MAX], int taille){
+void events(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
+{
     int init = 1;
     for (int colonne = 0; colonne < taille; colonne++)
     {
         for (int ligne = 0; ligne < taille; ligne++)
         {
-            if (rand() % 100 < 1 && map[ligne][colonne] == 1){
+            if (rand() % 100 < 1 && map[ligne][colonne] == 1)
+            {
                 map[ligne][colonne] = 216;
                 init++;
             }
-            if(init > 3){break;}
+            if (init > 3)
+            {
+                break;
+            }
         }
-        if(init > 3){break;}
+        if (init > 3)
+        {
+            break;
+        }
     }
 }
 
