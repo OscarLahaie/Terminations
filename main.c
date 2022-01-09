@@ -13,7 +13,32 @@
 int taille_map = 25;
 int difficulte = 0;
 int biome = 0;
+int nb_tours = 0;
 int map[HEIGHT_MAX][WIDTH_MAX];
+#ifndef COORD
+#define COORD
+typedef struct Coordonnees Coordonnees;
+struct Coordonnees
+{
+    int x;
+    int y;
+};
+#endif
+#ifndef UNITE
+#define UNITE
+typedef struct Unites Unites;
+struct Unites
+{
+    int position_x = -1;
+    int position_y = -1;
+    int deplacement_x = -1;
+    int deplacement_y = -1;
+    int type = -1;
+    int equipe = -1;
+};
+#endif
+Unites tab_unites[50];
+int const nb_unites_max = 50;
 // Retourne 0 si le joueur choisit de jouer, 1 si il désire quitter, 2 pour les paramètres
 int afficher_menu()
 {
@@ -650,6 +675,29 @@ int main(void)
             bool start = parametres_partie();
             if (start)
             {
+                //initialisation des unites
+                Unites lambda;
+                lambda.type = -1;
+                for (int i = 0; i <= nb_unites_max; i++)
+                {
+                    tab_unites[i] = lambda;
+                }
+
+                Unites mineur;
+                mineur.type = 0;
+                mineur.equipe = 0;
+                mineur.position_x = taille_map / 2 + 1;
+                mineur.position_y = 2;
+                mineur.deplacement_x = taille_map / 2 + 1;
+                mineur.deplacement_y = 2;
+                tab_unites[0] = mineur;
+                mineur.deplacement_y = taille_map - 2;
+                mineur.position_y = taille_map - 2;
+                mineur.equipe = 1;
+                tab_unites[1] = mineur;
+
+                nb_tours = 0;
+
                 if (biome == 0)
                 {
                     classique(map, taille_map);

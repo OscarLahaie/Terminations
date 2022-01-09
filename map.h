@@ -5,12 +5,28 @@
 #include <time.h>
 #define HEIGHT_MAX 50
 #define WIDTH_MAX 50
+#ifndef COORD
+#define COORD
 typedef struct Coordonnees Coordonnees;
 struct Coordonnees
 {
     int x;
     int y;
 };
+#endif
+#ifndef UNITE
+#define UNITE
+typedef struct Unites Unites;
+struct Unites
+{
+    int position_x;
+    int position_y;
+    int deplacement_x;
+    int deplacement_y;
+    int type;
+    int equipe;
+};
+#endif
 void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection)
 {
     if (type == 0)
@@ -507,7 +523,7 @@ void chateaux(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
     {
         for (int colonne = taille / 2 - 1; colonne <= taille / 2 + 1; colonne++)
         {
-            if((ligne != 1 && ligne != 3) && (colonne != taille / 2 - 1 && colonne != taille / 2 + 1))
+            if ((ligne != 1 && ligne != 3) && (colonne != taille / 2 - 1 && colonne != taille / 2 + 1))
             {
                 map[ligne][colonne] = 100;
                 map[taille - ligne - 1][colonne] = 99;
