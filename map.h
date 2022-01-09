@@ -56,6 +56,10 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                 {
                     printf("\033[100m");
                 }
+                else if (map[colonne][ligne] == 216)
+                {
+                    printf("\033[41m");
+                }
                 else
                 {
                     // Blanc pour les montagnes enneigées
@@ -499,6 +503,22 @@ void desert(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
     }
 
     // Fin des cactus
+}
+
+void events(int map[HEIGHT_MAX][WIDTH_MAX], int taille){
+    int init = 1;
+    for (int colonne = 0; colonne < taille; colonne++)
+    {
+        for (int ligne = 0; ligne < taille; ligne++)
+        {
+            if (rand() % 100 < 1 && map[ligne][colonne] == 1){
+                map[ligne][colonne] = 216;
+                init++;
+            }
+            if(init > 3){break;}
+        }
+        if(init > 3){break;}
+    }
 }
 
 void chateaux(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
