@@ -436,7 +436,7 @@ int afficher_menu()
     char phrase[100];
     printf("Votre choix : ");
     scanf("%s", phrase);
-    if (strcmp(phrase, "play") == 0 || strcmp(phrase, "Play") == 0 || strcmp(phrase, "PLAY") == 0)
+    if (strcmp(phrase, "play") == 0 || strcmp(phrase, "Play") == 0 || strcmp(phrase, "p") == 0 || strcmp(phrase, "PLAY") == 0)
     {
         return 0;
     }
@@ -602,6 +602,9 @@ int parametres_partie()
         case 'A':
             if (selection >= 0)
                 selection--;
+            break;
+        case 'p':
+            return true;
             break;
         case ' ':
             if (selection <= 4)
