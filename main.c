@@ -697,7 +697,7 @@ void affiche_unite(int mapf[HEIGHT_MAX][WIDTH_MAX])
         {
             if (tab_unites[i].position_x > -1 || tab_unites[i].position_y > -1)
             {
-                mapf[tab_unites[i].position_y][tab_unites[i].position_x] = 100 - tab_unites[i].type;
+                mapf[tab_unites[i].position_y][tab_unites[i].position_x] = 100 - tab_unites[i].type - tab_unites[i].equipe * 100;
             }
         }
     }
