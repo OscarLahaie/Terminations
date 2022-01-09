@@ -113,21 +113,40 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 }
                 else
                 {
+                    //Equipe rouge
                     if (map_unite[colonne][ligne] == 1)
                     {
-                        printf("\033[30m");
+                        printf("\033[30;101m");
                         printf(":o");
                     }
                     else if (map_unite[colonne][ligne] == 2)
                     {
-                        printf("\033[30m");
+                        printf("\033[30;101m");
                         printf(":v");
                     }
                     else if (map_unite[colonne][ligne] == 3)
                     {
-                        printf("\033[30m");
+                        printf("\033[30;101m");
                         printf("B)");
                     }
+
+                    //Equipe bleue
+                    if (map_unite[colonne][ligne] == 10)
+                    {
+                        printf("\033[30;104m");
+                        printf(":o");
+                    }
+                    else if (map_unite[colonne][ligne] == 11)
+                    {
+                        printf("\033[30;104m");
+                        printf(":v");
+                    }
+                    else if (map_unite[colonne][ligne] == 12)
+                    {
+                        printf("\033[30;104m");
+                        printf("B)");
+                    }
+
                     else
                     {
                         printf("\033[30m");
