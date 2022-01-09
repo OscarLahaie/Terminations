@@ -726,7 +726,7 @@ int main(void)
 
                 Unites mineur;
                 mineur.type = 1;
-                mineur.equipe = 0;
+                mineur.equipe = 1;
                 mineur.position_x = taille_map / 2;
                 mineur.position_y = 2;
                 mineur.deplacement_x = taille_map / 2;
@@ -766,15 +766,6 @@ int main(void)
                 do
                 {
                     int map_tmp[HEIGHT_MAX][WIDTH_MAX] = {{0}};
-                    map_tmp[1][1] = 1;
-                    map_tmp[2][1] = 2;
-                    map_tmp[3][1] = 3;
-                    map_tmp[1][1] = 10;
-                    map_tmp[2][1] = 11;
-                    map_tmp[3][1] = 12;
-                    map_tmp[1][2] = 1;
-                    map_tmp[2][2] = 2;
-                    map_tmp[3][2] = 3;
                     system("clear");
                     switch (c)
                     {
