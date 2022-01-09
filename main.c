@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "map.h"
+#include "pathfinder.h"
 #define HEIGHT_MAX 50
 #define WIDTH_MAX 50
 
@@ -15,6 +16,7 @@ int difficulte = 0;
 int biome = 0;
 int nb_tours = 0;
 int map[HEIGHT_MAX][WIDTH_MAX];
+int map_acces[HEIGHT_MAX][WIDTH_MAX];
 #ifndef COORD
 #define COORD
 typedef struct Coordonnees Coordonnees;
@@ -717,8 +719,9 @@ int main(void)
                 {
                     desert(map, taille_map);
                 }
+                convert(map, map_acces, taille_map);
                 chateaux(map, taille_map);
-                events(map, taille_map);
+                events(map, taille_map, 3);
                 int c;
                 Coordonnees selection;
                 selection.x = 3;
@@ -741,7 +744,15 @@ int main(void)
                     case 'D':
                         selection.x--;
                         break;
+                    case 't':
+                        nb_tours++;
+                        if (nb_tours % 10 == 0)
+                        {
+                            events(map, taille_map, 1);
+                        }
+                        break;
                     }
+                    printf("\rNombre de tours : %d\n\r", nb_tours);
                     afficher(map, biome, taille_map, selection);
                 } while ((c = getchar()) != 'q');
                 break;

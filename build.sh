@@ -12,7 +12,7 @@ compile() {
 #gcc pacman.c -o pacman -lpthread -Wall -Werror -pedantic -std=c11 -D _DEFAULT_SOURCE
 echo -e "\033[34mBuilding terminations\033[0m"
 #gcc terminations.c -o terminations -lncurses -Wall -Werror -pedantic -std=c11
-gcc main.c -o terminations -lncurses -Wall -Werror -pedantic -std=c11 map.h
+gcc main.c -o terminations -lncurses -Wall -Werror -pedantic -std=c11 map.h pathfinder.h
 }
 compile && echo Done || echo Error
 ./terminations

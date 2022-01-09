@@ -578,7 +578,7 @@ void desert(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
     // Fin des cactus
 }
 
-void events(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
+void events(int map[HEIGHT_MAX][WIDTH_MAX], int taille, int nb_events)
 {
     int init = 1;
     for (int colonne = 0; colonne < taille; colonne++)
@@ -590,12 +590,12 @@ void events(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
                 map[ligne][colonne] = 216;
                 init++;
             }
-            if (init > 3)
+            if (init > nb_events)
             {
                 break;
             }
         }
-        if (init > 3)
+        if (init > nb_events)
         {
             break;
         }

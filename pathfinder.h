@@ -10,21 +10,37 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-// Création d'un nouveau type de variable pour créer des tableau stockant le trajet à parcourir une fois le chemin trouvé
+#ifndef COORD
+#define COORD
 typedef struct Coordonnees Coordonnees;
 struct Coordonnees
 {
     int x;
     int y;
 };
+#endif
+#ifndef UNITE
+#define UNITE
+typedef struct Unites Unites;
+struct Unites
+{
+    int position_x;
+    int position_y;
+    int deplacement_x;
+    int deplacement_y;
+    int type;
+    int equipe;
+};
+#endif
+// Création d'un nouveau type de variable pour créer des tableau stockant le trajet à parcourir une fois le chemin trouvé
 
-void maptest(int map[HEIGHT][WIDTH], int taille)
+void convert(int map[HEIGHT][WIDTH], int map_acces[HEIGHT][WIDTH], int taille)
 {
     for (int i = 0; i < taille; i++)
     {
         for (int j = 0; j < taille; j++)
         {
-            map[i][j] = (rand() % 5) == 0 ? -1 : 0;
+            map_acces[i][j] = map[i][j] >= 0 && map[i][j] < 5 ? 0 : -1;
         }
     }
 }
@@ -146,14 +162,14 @@ void chemins(int map[HEIGHT][WIDTH], Coordonnees chemin[HEIGHT * WIDTH], Coordon
         chemin[0] = fausse;
     }
 }
-
+/*
 int main()
 {
 
     int map[HEIGHT][WIDTH];
     Coordonnees chemin[HEIGHT * WIDTH] = {{0, 0}};
 
-    maptest(map);
+    convert (map);
     Coordonnees depart;
     depart.x = 15;
     depart.y = 10;
@@ -213,4 +229,4 @@ int main()
     }
     printf("\n");
     printf("\033[0;40m");
-}
+}*/
