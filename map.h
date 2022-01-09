@@ -76,6 +76,20 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                 {
                     printf("\033[41m");
                 }
+
+                else if (map[colonne][ligne] == -100)
+                {
+                    printf("\033[101m");
+                }
+                else if (map[colonne][ligne] == -101)
+                {
+                    printf("\033[101m");
+                }
+                else if (map[colonne][ligne] == -102)
+                {
+                    printf("\033[101m");
+                }
+                
                 else
                 {
                     // Blanc pour les montagnes enneigées
@@ -104,6 +118,23 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                     printf("\033[37m");
                     printf("$$");
                 }
+
+                else if (map[colonne][ligne] == -100)
+                {
+                    printf("\033[30m");
+                    printf(":o");
+                }
+                else if (map[colonne][ligne] == -101)
+                {
+                    printf("\033[30m");
+                    printf(":v");
+                }
+                else if (map[colonne][ligne] == -102)
+                {
+                    printf("\033[30m");
+                    printf("B)");
+                }
+
                 else
                 {
                     printf("  ");

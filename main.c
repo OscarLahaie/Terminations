@@ -722,6 +722,10 @@ int main(void)
                 convert(map, map_acces, taille_map);
                 chateaux(map, taille_map);
                 events(map, taille_map, 3);
+
+                map[1][1] = -100;
+                map[2][1] = -102;
+                map[3][1] = -104;
                 int c;
                 Coordonnees selection;
                 selection.x = 3;
