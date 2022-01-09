@@ -138,6 +138,22 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                     // blanc neige
                     printf("\033[0;47m");
                 }
+                else if (map[colonne][ligne] == 99)
+                {
+                    printf("\033[101m");
+                }
+                else if (map[colonne][ligne] == 100)
+                {
+                    printf("\033[104m");
+                }
+                else if (map[colonne][ligne] == 101)
+                {
+                    printf("\033[100m");
+                }
+                else if (map[colonne][ligne] == 216)
+                {
+                    printf("\033[41m");
+                }
                 // Fin couleur du fond
                 // Couleur + caractères
                 if (map[colonne][ligne] == 2)
@@ -149,6 +165,16 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                 {
                     printf("\033[2;37m");
                     printf("//");
+                }
+                else if (map[colonne][ligne] == 101)
+                {
+                    printf("\033[30m");
+                    printf("¤¤");
+                }
+                else if (map[colonne][ligne] == 216)
+                {
+                    printf("\033[37m");
+                    printf("$$");
                 }
                 else
                 {
@@ -183,6 +209,22 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                     // désert jaune
                     printf("\033[0;43m");
                 }
+                else if (map[colonne][ligne] == 99)
+                {
+                    printf("\033[101m");
+                }
+                else if (map[colonne][ligne] == 100)
+                {
+                    printf("\033[104m");
+                }
+                else if (map[colonne][ligne] == 101)
+                {
+                    printf("\033[100m");
+                }
+                else if (map[colonne][ligne] == 216)
+                {
+                    printf("\033[41m");
+                }
                 // Fin couleur du fond
                 // Couleur + caractères
                 if (map[colonne][ligne] == 2)
@@ -194,6 +236,16 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                 {
                     printf("\033[2;32m");
                     printf("XX");
+                }
+                else if (map[colonne][ligne] == 101)
+                {
+                    printf("\033[30m");
+                    printf("¤¤");
+                }
+                else if (map[colonne][ligne] == 216)
+                {
+                    printf("\033[37m");
+                    printf("$$");
                 }
                 else
                 {
