@@ -27,7 +27,7 @@ struct Unites
     int equipe;
 };
 #endif
-void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection)
+void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees selection)
 {
     if (type == 0)
     {
@@ -89,7 +89,7 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                 {
                     printf("\033[101m");
                 }
-                
+
                 else
                 {
                     // Blanc pour les montagnes enneigées
@@ -612,12 +612,13 @@ void desert(int map[HEIGHT_MAX][WIDTH_MAX], int taille)
 void events(int map[HEIGHT_MAX][WIDTH_MAX], int taille, int nb_events)
 {
     int init = 1;
-    while(init <= nb_events)
+    while (init <= nb_events)
     {
-        int random_line = rand() % (taille+1);
-        int random_column = rand() % (taille+1);
+        int random_line = rand() % (taille + 1);
+        int random_column = rand() % (taille + 1);
 
-        if(map[random_line][random_column] == 1){
+        if (map[random_line][random_column] == 1)
+        {
             map[random_line][random_column] = 216;
             init++;
         }

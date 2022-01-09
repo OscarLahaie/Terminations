@@ -765,6 +765,7 @@ int main(void)
                 system("/usr/bin/stty raw");
                 do
                 {
+                    int map_tmp[HEIGHT_MAX][WIDTH_MAX] = {{0}};
                     system("clear");
                     switch (c)
                     {
@@ -786,15 +787,13 @@ int main(void)
                         {
                             events(map, taille_map, 1);
                         }
-                        int map_tmp[HEIGHT_MAX][WIDTH_MAX] = {{0}};
-                        memcpy(map, map_tmp, HEIGHT_MAX * WIDTH_MAX * sizeof(map));
                         actualise_unite(tab_unites);
                         affiche_unite(map_tmp);
                         break;
                     }
                     printf("\rNombre de tours : %d\n\r", nb_tours);
 
-                    afficher(map, biome, taille_map, selection);
+                    afficher(map, map_tmp, biome, taille_map, selection);
                 } while ((c = getchar()) != 'q');
                 break;
                 //liaison avec le jeu
