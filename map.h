@@ -77,15 +77,15 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                     printf("\033[41m");
                 }
 
-                else if (map[colonne][ligne] == -100)
+                else if (map[colonne][ligne] == 1000)
                 {
                     printf("\033[101m");
                 }
-                else if (map[colonne][ligne] == -101)
+                else if (map[colonne][ligne] == 1001)
                 {
                     printf("\033[101m");
                 }
-                else if (map[colonne][ligne] == -102)
+                else if (map[colonne][ligne] == 1002)
                 {
                     printf("\033[101m");
                 }
@@ -119,17 +119,17 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int type, int taille, Coordonnees 
                     printf("$$");
                 }
 
-                else if (map[colonne][ligne] == -100)
+                else if (map[colonne][ligne] == 1000)
                 {
                     printf("\033[30m");
                     printf(":o");
                 }
-                else if (map[colonne][ligne] == -101)
+                else if (map[colonne][ligne] == 1001)
                 {
                     printf("\033[30m");
                     printf(":v");
                 }
-                else if (map[colonne][ligne] == -102)
+                else if (map[colonne][ligne] == 1002)
                 {
                     printf("\033[30m");
                     printf("B)");

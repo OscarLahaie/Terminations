@@ -33,8 +33,8 @@ struct Unites
 {
     int position_x = -1;
     int position_y = -1;
-    int deplacement_x = -1;
-    int deplacement_y = -1;
+    int final_x = -1;
+    int final_y = -1;
     int type = -1;
     int equipe = -1;
 };
@@ -663,45 +663,13 @@ int parametres_partie()
     }
     return 0;
 }
-
-void actualise_unite(Unites tab_unites[50])
+/*
+void actualise_unite()
 {
-    for (int i = 0; i < nb_unites_max; i++)
-    {
-        if (tab_unites[i].type >= 0)
-        {
-            if (tab_unites[i].position_x != tab_unites[i].deplacement_x || tab_unites[i].position_y != tab_unites[i].deplacement_y)
-            {
-                Coordonnees chemin[HEIGHT_MAX * WIDTH_MAX];
-                Coordonnees depart;
-                depart.x = tab_unites[i].position_x;
-                depart.y = tab_unites[i].position_y;
-                Coordonnees arrivee;
-                arrivee.x = tab_unites[i].position_x;
-                arrivee.y = tab_unites[i].position_y;
+    for (int i = 0; i< nb_unites_max;i++){
 
-                chemins(map_acces, chemin, depart, arrivee, taille_map);
-
-                tab_unites[i].position_x = chemin[1].x;
-                tab_unites[i].position_y = chemin[1].y;
-            }
-        }
     }
-}
-
-void affiche_unite(int mapf[HEIGHT_MAX][WIDTH_MAX])
-{
-    for (int i = 0; i < nb_unites_max; i++)
-    {
-        if (tab_unites[i].type >= 0)
-        {
-            if (tab_unites[i].position_x > -1 || tab_unites[i].position_y > -1)
-            {
-                mapf[tab_unites[i].position_y][tab_unites[i].position_x] = 100 - tab_unites[i].type - tab_unites[i].equipe * 100;
-            }
-        }
-    }
-}
+}*/
 
 int main(void)
 {
@@ -755,9 +723,9 @@ int main(void)
                 chateaux(map, taille_map);
                 events(map, taille_map, 3);
 
-                map[1][1] = -100;
-                map[2][1] = -102;
-                map[3][1] = -104;
+                map[1][1] = 1000;
+                map[2][1] = 1001;
+                map[3][1] = 1002;
                 int c;
                 Coordonnees selection;
                 selection.x = 3;
@@ -786,14 +754,9 @@ int main(void)
                         {
                             events(map, taille_map, 1);
                         }
-                        int map_tmp[HEIGHT_MAX][WIDTH_MAX] = {{0}};
-                        memcpy(map, map_tmp, HEIGHT_MAX * WIDTH_MAX * sizeof(map));
-                        actualise_unite(tab_unites);
-                        affiche_unite(map_tmp);
                         break;
                     }
                     printf("\rNombre de tours : %d\n\r", nb_tours);
-
                     afficher(map, biome, taille_map, selection);
                 } while ((c = getchar()) != 'q');
                 break;
