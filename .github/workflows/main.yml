@@ -28,6 +28,7 @@ jobs:
       - name: Build everything
         run: |
           mkdir -p publish
+          chmod +x build.sh
           ./build.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
