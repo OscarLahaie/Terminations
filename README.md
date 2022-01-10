@@ -1,7 +1,7 @@
 [![CI](https://github.com/OscarLahaie/Terminations/actions/workflows/main.yml/badge.svg)](https://github.com/OscarLahaie/Terminations/actions/workflows/main.yml)
 
 # Terminations
-Projet n°3 d'informatique de la classe de MP2I du lycée Carnot, Dijon.
+Projet n°3 d'informatique de la classe de MP2I 2021-2022 du lycée Carnot, Dijon.
 
 #### Groupe composé de :
 - LAMATY Cassandre <[@CassandreLAMATY](https://github.com/CassandreLAMATY)> 
@@ -19,14 +19,13 @@ De FOULON Valentin <[@srgoti](https://github.com/srgoti)>
 - Le jeu de la vie
 
 ## Comment compiler
-```bash
-#!/bin/bash
-gcc main.c -o terminations -lncurses -Wall -Werror -pedantic -std=c11 map.h pathfinder.h
-./terminations
-```
-Ou pour avoir le résultat instantanément  
+Pour compiler tous les fichiers
 ```bash
 ./build.sh
+```
+Ou pour avoir le résultat instantanément du jeu principal
+```bash
+./play.sh
 ```
 
 ## Contrôles
@@ -34,7 +33,7 @@ Ou pour avoir le résultat instantanément
 - p pour play et skip le paramétrage au début du jeu (facilité permettant d'aller plus rapidement au lancement du jeu) ;
 - flèches directionnelles pour déplacer le curseur ;
 - m pour sélectionner un pion, le déplacer à l'aide des flèches et espace pour valider la case d'arrivée ;
-- t pour passer un tour ;
+- t pour passer au tour suivant ;
 
 
 ## Compte rendu
