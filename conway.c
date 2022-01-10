@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -5,8 +6,6 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <string.h>
-
-#define _BSD_SOURCE
 
 int lcount;
 int ccount;
