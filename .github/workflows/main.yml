@@ -28,7 +28,6 @@ jobs:
       - name: Build everything
         run: |
           mkdir -p publish
-          for file in *.c; do gcc $file -o publish/$(basename $file .c) -lpthread -lncursesw; done
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
