@@ -745,7 +745,7 @@ void deplacement(int i, int distance, Coordonnees chemin[50])
     if (est_unite(chemin[distance].y, chemin[distance].x))
     {
         Unites *point = get_unite(chemin[distance].x, chemin[distance].y);
-        if ((*point).equipe == tab_unites[i].equipe && (*point).type == tab_unites[i].type)
+        if ((*point).equipe == tab_unites[i].equipe && (*point).type == tab_unites[i].type && tab_unites[i].type < 6)
         {
             tab_unites[i].position_x = chemin[distance].x;
             tab_unites[i].position_y = chemin[distance].y;
@@ -824,7 +824,7 @@ void actualise_unite(Unites tab_unites[50])
                 {
                     deplacement(i, 1, chemin);
                 }
-                else if (tab_unites[i].type <= 6)
+                else if (tab_unites[i].type <= 5)
                 {
                     if (chemin[1].x == tab_unites[i].deplacement_x && chemin[1].y == tab_unites[i].deplacement_y)
                     {
@@ -1008,8 +1008,8 @@ int main(void)
 
                 int c;
                 Coordonnees selection;
-                selection.x = 3;
-                selection.y = 3;
+                selection.x = taille_map / 2;
+                selection.y = taille_map / 2;
 
                 bool etat_move = false;
                 system("/usr/bin/stty raw");
@@ -1098,12 +1098,16 @@ int main(void)
                         }
                         break;
                     }
-                    printf("\rNombre de tours : %d | Points joeur bleu : %d | Points joeur rouge : %d\n\r", nb_tours / 2, points_joueur_bleu, points_joueur_rouge);
+                    printf("\rNombre de tours : %d | Points joueur bleu : %d | Points joueur rouge : %d\n\r", nb_tours / 2, points_joueur_bleu, points_joueur_rouge);
                     printf("\rPoints de vie chateau bleu  = %d | Points de vie chateau rouge = %d \n\r", points_vie_bleu, points_vie_rouge);
                     printf(nb_tours % 2 == 1 ? "C'est le tour du joueur bleu !\n\r" : "C'est le tour du joueur rouge !\n\r");
+                    if (etat_move)
+                    {
+                        printf("Selectionner l'endroit où vous souhaiter diriger votre unité et appuyez sur espace.\n\r");
+                    }
                     affiche_unite(map_tmp);
                     afficher(map, map_tmp, biome, taille_map, selection, etat_move);
-                    printf("\r q : quitter , m : selectionner uniter, ' ' : selectionner l'endroit, t : Joueur suivant\n\r");
+                    printf("\r q : quitter , m : bouger uniter, ' ' : selectionner l'endroit, t : Joueur suivant, b : acheter un nouvelle unité\n\r");
                 } while ((c = getchar()) != 'q');
                 printf("\r");
                 break;

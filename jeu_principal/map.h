@@ -72,6 +72,7 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 {
                     printf("\033[101m");
                 }
+                //chateau
                 else if (map[colonne][ligne] == 100)
                 {
                     printf("\033[104m");
@@ -80,6 +81,7 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 {
                     printf("\033[100m");
                 }
+                //event
                 else if (map[colonne][ligne] == 216)
                 {
                     printf("\033[41m");
@@ -206,8 +208,19 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
         {
             for (int ligne = 0; ligne < taille; ligne++)
             {
+                if (selection.x == ligne && selection.y == colonne)
+                {
+                    if (etat_move)
+                    {
+                        printf("\033[4;5;42m");
+                    }
+                    else
+                    {
+                        printf("\033[105m");
+                    }
+                }
                 // Couleur du fond
-                if (map[colonne][ligne] < 0)
+                else if (map[colonne][ligne] < 0)
                 {
                     //Bleu foncé pour le fond de l'eau
                     printf("\033[0;44m");
@@ -240,29 +253,104 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 }
                 // Fin couleur du fond
                 // Couleur + caractères
-                if (map[colonne][ligne] == 2)
+                if (map_unite[colonne][ligne] == 0)
                 {
-                    printf("\033[2;30m");
-                    printf("XX");
-                }
-                else if (map[colonne][ligne] <= 0)
-                {
-                    printf("\033[2;37m");
-                    printf("//");
-                }
-                else if (map[colonne][ligne] == 101)
-                {
-                    printf("\033[30m");
-                    printf("¤¤");
-                }
-                else if (map[colonne][ligne] == 216)
-                {
-                    printf("\033[37m");
-                    printf("$$");
+                    if (map[colonne][ligne] == 2)
+                    {
+                        printf("\033[2;30m");
+                        printf("XX");
+                    }
+                    else if (map[colonne][ligne] <= 0)
+                    {
+                        printf("\033[2;37m");
+                        printf("//");
+                    }
+                    else if (map[colonne][ligne] == 101)
+                    {
+                        printf("\033[30m");
+                        printf("¤¤");
+                    }
+                    else if (map[colonne][ligne] == 216)
+                    {
+                        printf("\033[37m");
+                        printf("$$");
+                    }
+                    else
+                    {
+                        printf("  ");
+                    }
                 }
                 else
                 {
-                    printf("  ");
+                    //Equipe rouge
+                    if (map_unite[colonne][ligne] == 1)
+                    {
+                        printf("\033[38;5;124m");
+                        printf(":o");
+                    }
+                    else if (map_unite[colonne][ligne] == 2)
+                    {
+                        printf("\033[38;5;124m");
+                        printf(":v");
+                    }
+                    else if (map_unite[colonne][ligne] == 3)
+                    {
+                        printf("\033[38;5;124m");
+                        printf("B)");
+                    }
+                    else if (map_unite[colonne][ligne] == 4)
+                    {
+                        printf("\033[38;5;124m");
+                        printf(":)");
+                    }
+                    else if (map_unite[colonne][ligne] == 5)
+                    {
+                        printf("\033[38;5;124m");
+                        printf(";)");
+                    }
+                    else if (map_unite[colonne][ligne] == 6)
+                    {
+                        printf("\033[38;5;124m");
+                        printf("o/");
+                    }
+
+                    //Equipe bleue
+                    else if (map_unite[colonne][ligne] == 11)
+                    {
+                        printf("\033[38;5;117m");
+                        printf(":o");
+                    }
+                    else if (map_unite[colonne][ligne] == 12)
+                    {
+                        printf("\033[38;5;117m");
+                        printf(":v");
+                    }
+                    else if (map_unite[colonne][ligne] == 13)
+                    {
+                        printf("\033[38;5;117m");
+                        printf("B)");
+                    }
+                    else if (map_unite[colonne][ligne] == 14)
+                    {
+                        printf("\033[38;5;117m");
+                        printf(":)");
+                    }
+                    else if (map_unite[colonne][ligne] == 15)
+                    {
+                        printf("\033[38;5;117m");
+                        printf(";)");
+                    }
+                    else if (map_unite[colonne][ligne] == 16)
+                    {
+                        printf("\033[38;5;117m");
+                        printf("o/");
+                    }
+
+                    else
+                    {
+                        printf("\033[30m");
+                        printf("  ");
+                    }
                 }
                 // Fin couleur + caractères
             }
@@ -277,8 +365,19 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
         {
             for (int ligne = 0; ligne < taille; ligne++)
             {
+                if (selection.x == ligne && selection.y == colonne)
+                {
+                    if (etat_move)
+                    {
+                        printf("\033[4;5;47m");
+                    }
+                    else
+                    {
+                        printf("\033[105m");
+                    }
+                }
                 // Couleur du fond
-                if (map[colonne][ligne] < 0)
+                else if (map[colonne][ligne] < 0)
                 {
                     //Bleu clair oasis
                     printf("\033[0;46m");
@@ -311,29 +410,104 @@ void afficher(int map[HEIGHT_MAX][WIDTH_MAX], int map_unite[HEIGHT_MAX][WIDTH_MA
                 }
                 // Fin couleur du fond
                 // Couleur + caractères
-                if (map[colonne][ligne] == 2)
+                if (map_unite[colonne][ligne] == 0)
                 {
-                    printf("\033[2;32m");
-                    printf("##");
-                }
-                else if (map[colonne][ligne] == 0)
-                {
-                    printf("\033[2;32m");
-                    printf("XX");
-                }
-                else if (map[colonne][ligne] == 101)
-                {
-                    printf("\033[30m");
-                    printf("¤¤");
-                }
-                else if (map[colonne][ligne] == 216)
-                {
-                    printf("\033[37m");
-                    printf("$$");
+                    if (map[colonne][ligne] == 2)
+                    {
+                        printf("\033[2;32m");
+                        printf("##");
+                    }
+                    else if (map[colonne][ligne] == 0)
+                    {
+                        printf("\033[2;32m");
+                        printf("XX");
+                    }
+                    else if (map[colonne][ligne] == 101)
+                    {
+                        printf("\033[30m");
+                        printf("¤¤");
+                    }
+                    else if (map[colonne][ligne] == 216)
+                    {
+                        printf("\033[37m");
+                        printf("$$");
+                    }
+                    else
+                    {
+                        printf("  ");
+                    }
                 }
                 else
                 {
-                    printf("  ");
+                    //Equipe rouge
+                    if (map_unite[colonne][ligne] == 1)
+                    {
+                        printf("\033[38;5;124m");
+                        printf(":o");
+                    }
+                    else if (map_unite[colonne][ligne] == 2)
+                    {
+                        printf("\033[38;5;124m");
+                        printf(":v");
+                    }
+                    else if (map_unite[colonne][ligne] == 3)
+                    {
+                        printf("\033[38;5;124m");
+                        printf("B)");
+                    }
+                    else if (map_unite[colonne][ligne] == 4)
+                    {
+                        printf("\033[38;5;124m");
+                        printf(":)");
+                    }
+                    else if (map_unite[colonne][ligne] == 5)
+                    {
+                        printf("\033[38;5;124m");
+                        printf(";)");
+                    }
+                    else if (map_unite[colonne][ligne] == 6)
+                    {
+                        printf("\033[38;5;124m");
+                        printf("o/");
+                    }
+
+                    //Equipe bleue
+                    else if (map_unite[colonne][ligne] == 11)
+                    {
+                        printf("\033[38;5;117m");
+                        printf(":o");
+                    }
+                    else if (map_unite[colonne][ligne] == 12)
+                    {
+                        printf("\033[38;5;117m");
+                        printf(":v");
+                    }
+                    else if (map_unite[colonne][ligne] == 13)
+                    {
+                        printf("\033[38;5;117m");
+                        printf("B)");
+                    }
+                    else if (map_unite[colonne][ligne] == 14)
+                    {
+                        printf("\033[38;5;117m");
+                        printf(":)");
+                    }
+                    else if (map_unite[colonne][ligne] == 15)
+                    {
+                        printf("\033[38;5;117m");
+                        printf(";)");
+                    }
+                    else if (map_unite[colonne][ligne] == 16)
+                    {
+                        printf("\033[38;5;117m");
+                        printf("o/");
+                    }
+
+                    else
+                    {
+                        printf("\033[30m");
+                        printf("  ");
+                    }
                 }
                 // Fin couleur + caractères
             }
