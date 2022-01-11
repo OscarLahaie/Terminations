@@ -544,6 +544,7 @@ void startconnect() {
 		printw("enter");
 		attroff(COLOR_PAIR(FG_BLUE));
 		printw(" to validate");
+		refresh();
 		move(1, 0);
 	}
 	struct addrinfo hints, *res;
@@ -562,6 +563,7 @@ void startconnect() {
 		attron(COLOR_PAIR(FG_RED));
 		mvprintw(0, 0, "Failed to connect to host");
 		attroff(COLOR_PAIR(FG_RED));
+		refresh();
 		sleep(2);
 		doexit(1);
 	}
@@ -594,7 +596,6 @@ void startserver() {
 	erase();
 	socklen_t addr_size = sizeof(server);
 	memset(&server, 0, sizeof(server));
-
 	mvprintw(0, 0, "Waiting for someone to connect, IP addresses of this pc");
 	move(1, 0);
 	system("if command -v ip >/dev/null 2>&1; then list=$(for line in $(ip route show); do echo $line; done | grep -A 2 src | grep 192.168) && for elem in $list; do echo -e \r\033[32m$elem\033[0m; done; else echo -e \033[31mcommand `ip` not installed\033[0m; fi");
@@ -614,7 +615,11 @@ void startserver() {
 	printw("%s", inet_ntoa(client.sin_addr));
 	attroff(COLOR_PAIR(FG_GREEN));
 //	printf("\rReceived connection from \"%s\", IP address : %s\n", hostName->h_name, inet_ntoa(client.sin_addr));
+	system("clear");
+	printf("\033[1;1H\033[2J");
+	refresh();
 	erase();
+	refresh();
 	// Server chooses a color
 	mvprintw(0, 0, "What color would you like to play ? Use ");
 	attron(COLOR_PAIR(FG_GREEN));
@@ -688,6 +693,7 @@ void startserver() {
 	erase();
 //	system("/usr/bin/stty cooked");
 	int sendblack2;
+	iswhiteplayer = 1 - player_pos;
 	switch(player_pos) {
 		case 0:
 			sendblack2 = 0;
@@ -700,6 +706,7 @@ void startserver() {
 	}
 	// Send to client the other color
 	send(sockfd, &sendblack2, sizeof(int), 0);
+	erase();
 //	clearscreen();
 }
 
@@ -853,7 +860,7 @@ void waitforevent() {
 		skipturn = false;
 		if (sockfd != 0 && !iswhiteplayer && firstmove == 0) {
 			// If we are not white player and in lan, wait for the other player to start
-			wprintw(input, "Waiting for other player");
+			mvwprintw(input, 1, 1, "Waiting for other player");
 			wrefresh(input);
 			char* otherguymove = malloc(4 * sizeof(char));
 			recv(sockfd, otherguymove, 4, 0);
