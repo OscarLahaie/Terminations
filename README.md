@@ -12,6 +12,8 @@ Projet n°3 d'informatique de la classe de MP2I 2021-2022 du lycée Carnot, Dijo
 Il s'agit d'un jeu dans le style de Clash Royale / Civilisation mais remanié de façon à être jouable dans le terminal et avec des fonctionnalités simplifiées.
 En prime, plusieurs mini-jeux développés par [@srgoti](https://github.com/srgoti) sont disponibles.
 
+![Cloc](./source/cloc.png)
+
 #### Les mini-jeux comprennent :
 De FOULON Valentin <[@srgoti](https://github.com/srgoti)>
 - Le démineur
