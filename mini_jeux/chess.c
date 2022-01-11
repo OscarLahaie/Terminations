@@ -591,13 +591,15 @@ void startserver() {
 	bind(new_fd, res->ai_addr, res->ai_addrlen);
 	listen(new_fd, 1);
 	erase();
+	refresh();
 	socklen_t addr_size = sizeof(server);
 	memset(&server, 0, sizeof(server));
 	mvprintw(0, 0, "Waiting for someone to connect, IP addresses of this pc");
 	move(1, 0);
+	refresh();
 	system("if command -v ip >/dev/null 2>&1; then list=$(for line in $(ip route show); do echo $line; done | grep -A 2 src | grep 192.168) && for elem in $list; do echo -e \r\033[32m$elem\033[0m; done; else echo -e \033[31mcommand `ip` not installed\033[0m; fi");
 	sockfd = accept(new_fd, (struct sockaddr *) &client, &addr_size);
-	erase();
+//	erase();
 	struct hostent *hostName;
 	struct in_addr ipv4addr;
 	inet_pton(AF_INET, inet_ntoa(client.sin_addr), &ipv4addr);
