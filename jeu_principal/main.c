@@ -12,13 +12,15 @@
 #define WIDTH_MAX 50
 
 int taille_map = 25;
-int difficulte = 0;
 int biome = 0;
 int nb_tours = 0;
+int nb_events_tours = 3;
+int freq_events_tours = 20;
 int points_joueur_bleu = 0;
-int points_vie_bleu = 50;
+int points_vie_bleu = 1;
 int points_joueur_rouge = 0;
-int points_vie_rouge = 50;
+int points_vie_rouge = 1;
+int temps_partie = 1;
 int map[HEIGHT_MAX][WIDTH_MAX];
 int map_acces[HEIGHT_MAX][WIDTH_MAX];
 #ifndef COORD
@@ -535,57 +537,57 @@ void afficher_parametres_partie(int selection)
         {
             printf("\033[47m");
             printf("\033[31m");
-            printf("\rniveau : %s\n", phrase[i]);
+            printf("\rtype : %s\n", phrase[i]);
         }
         else if (i + 5 == selection)
         {
             printf("\033[47m");
             printf("\033[30m");
-            printf("\rniveau : %s\n", phrase[i]);
+            printf("\rtype : %s\n", phrase[i]);
         }
         else if (i == biome)
         {
             printf("\033[41m");
             printf("\033[37m");
-            printf("\rniveau : %s\n", phrase[i]);
+            printf("\rtype : %s\n", phrase[i]);
         }
         else
         {
             printf("\033[40m");
             printf("\033[37m");
-            printf("\rniveau : %s\n", phrase[i]);
+            printf("\rtype : %s\n", phrase[i]);
         }
     }
     printf("\033[40m");
     printf("\033[37m");
-    printf("\n\rDifficulté :\n");
-    char phrase2[3][15] = {{"Facile"}, {"Medium"}, {"Dur"}};
+    printf("\n\rtemps_partie de jeu :\n");
+    char phrase2[3][15] = {{"court"}, {"moyen"}, {"long"}};
     for (int i = 0; i < 3; i++)
     {
 
-        if (i + 8 == selection && i == difficulte)
+        if (i + 8 == selection && i == temps_partie)
         {
             printf("\033[47m");
             printf("\033[31m");
-            printf("\rniveau : %s\n", phrase2[i]);
+            printf("\rdurée : %s\n", phrase2[i]);
         }
         else if (i + 8 == selection)
         {
             printf("\033[47m");
             printf("\033[30m");
-            printf("\rniveau : %s\n", phrase2[i]);
+            printf("\rdurée : %s\n", phrase2[i]);
         }
-        else if (i == difficulte)
+        else if (i == temps_partie)
         {
             printf("\033[41m");
             printf("\033[37m");
-            printf("\rniveau : %s\n", phrase2[i]);
+            printf("\rdurée : %s\n", phrase2[i]);
         }
         else
         {
             printf("\033[40m");
             printf("\033[37m");
-            printf("\rniveau : %s\n", phrase2[i]);
+            printf("\rdurée : %s\n", phrase2[i]);
         }
     }
 
@@ -649,7 +651,30 @@ int parametres_partie()
             }
             else if (selection <= 10)
             {
-                difficulte = selection - 7;
+                if (selection - 7 == 0)
+                {
+                    temps_partie = 0;
+                    points_vie_bleu = 10;
+                    points_joueur_rouge = 10;
+                    freq_events_tours = 10;
+                    nb_events_tours = 3;
+                }
+                else if (selection - 7 == 1)
+                {
+                    temps_partie = 1;
+                    points_vie_bleu = 25;
+                    points_joueur_rouge = 25;
+                    freq_events_tours = 15;
+                    nb_events_tours = 4;
+                }
+                else if (selection - 7 == 2)
+                {
+                    temps_partie = 2;
+                    points_vie_bleu = 50;
+                    points_joueur_rouge = 50;
+                    freq_events_tours = 20;
+                    nb_events_tours = 5;
+                }
             }
             break;
         }
@@ -666,6 +691,7 @@ int parametres_partie()
 
         afficher_parametres_partie(selection);
     }
+    system("reset");
     return 0;
 }
 
@@ -683,6 +709,7 @@ bool est_unite(int ligne, int colonne)
     }
     return false;
 }
+
 int equipe_unite(int ligne, int colonne)
 {
     for (int i = 0; i < nb_unites_max; i++)
@@ -713,6 +740,50 @@ Unites *get_unite(int ligne, int colonne)
     return &(tab_unites[0]);
 }
 
+void deplacement(int i, int distance, Coordonnees chemin[50])
+{
+    if (est_unite(chemin[distance].y, chemin[distance].x))
+    {
+        Unites *point = get_unite(chemin[distance].x, chemin[distance].y);
+        if ((*point).equipe == tab_unites[i].equipe && (*point).type == tab_unites[i].type)
+        {
+            tab_unites[i].position_x = chemin[distance].x;
+            tab_unites[i].position_y = chemin[distance].y;
+            tab_unites[i].type += 1;
+            (*point).type = -1;
+        }
+        else if ((*point).equipe != tab_unites[i].equipe)
+        {
+            if ((*point).type < tab_unites[i].type)
+            {
+                tab_unites[i].position_x = (*point).position_x;
+                tab_unites[i].position_y = (*point).position_y;
+                tab_unites[i].type = tab_unites[i].type - (rand() % ((*point).type + 1));
+                (*point).type = -1;
+            }
+            else if ((*point).type > tab_unites[i].type)
+            {
+                (*point).type = (*point).type - (rand() % (tab_unites[i].type + 1));
+                tab_unites[i].type = -1;
+            }
+            else
+            {
+                tab_unites[i].type = -1;
+                (*point).type = -1;
+            }
+        }
+        else
+        {
+            tab_unites[i].deplacement_x = tab_unites[i].position_x;
+            tab_unites[i].deplacement_y = tab_unites[i].position_y;
+        }
+    }
+    else
+    {
+        tab_unites[i].position_x = chemin[distance].x;
+        tab_unites[i].position_y = chemin[distance].y;
+    }
+}
 void actualise_unite(Unites tab_unites[50])
 {
     for (int i = 0; i < nb_unites_max; i++)
@@ -749,60 +820,49 @@ void actualise_unite(Unites tab_unites[50])
                     tab_unites[i].deplacement_x = tab_unites[i].position_x;
                     tab_unites[i].deplacement_y = tab_unites[i].position_y;
                 }
-                else if (est_unite(chemin[1].y, chemin[1].x))
+                if (tab_unites[i].type <= 3)
                 {
-                    Unites *point = get_unite(chemin[1].x, chemin[1].y);
-                    if ((*point).equipe == tab_unites[i].equipe && (*point).type == tab_unites[i].type)
+                    deplacement(i, 1, chemin);
+                }
+                else if (tab_unites[i].type <= 6)
+                {
+                    if (chemin[1].x == tab_unites[i].deplacement_x && chemin[1].y == tab_unites[i].deplacement_y)
                     {
-                        tab_unites[i].position_x = chemin[1].x;
-                        tab_unites[i].position_y = chemin[1].y;
-                        tab_unites[i].type += 1;
-                        (*point).type = -1;
-                    }
-                    else if ((*point).equipe != tab_unites[i].equipe)
-                    {
-                        if ((*point).type < tab_unites[i].type)
-                        {
-                            tab_unites[i].position_x = (*point).position_x;
-                            tab_unites[i].position_y = (*point).position_y;
-                            tab_unites[i].type = tab_unites[i].type - (*point).type;
-                            (*point).type = -1;
-                        }
-                        else if ((*point).type > tab_unites[i].type)
-                        {
-                            (*point).type = (*point).type - tab_unites[i].type;
-                            tab_unites[i].type = -1;
-                        }
-                        else
-                        {
-                            tab_unites[i].type = -1;
-                            (*point).type = -1;
-                        }
+                        deplacement(i, 1, chemin);
                     }
                     else
                     {
-                        tab_unites[i].deplacement_x = tab_unites[i].position_x;
-                        tab_unites[i].deplacement_y = tab_unites[i].position_y;
+                        deplacement(i, 2, chemin);
                     }
                 }
                 else
                 {
-                    tab_unites[i].position_x = chemin[1].x;
-                    tab_unites[i].position_y = chemin[1].y;
+                    if (chemin[1].x == tab_unites[i].deplacement_x && chemin[1].y == tab_unites[i].deplacement_y)
+                    {
+                        deplacement(i, 1, chemin);
+                    }
+                    else if (chemin[2].x == tab_unites[i].deplacement_x && chemin[2].y == tab_unites[i].deplacement_y)
+                    {
+                        deplacement(i, 2, chemin);
+                    }
+                    else
+                    {
+                        deplacement(i, 3, chemin);
+                    }
                 }
             }
-            if (map[tab_unites[i].position_y][tab_unites[i].position_x] == 216)
+        }
+        if (map[tab_unites[i].position_y][tab_unites[i].position_x] == 216)
+        {
+            if (tab_unites[i].equipe == 0)
             {
-                if (tab_unites[i].equipe == 0)
-                {
-                    points_joueur_rouge += 1;
-                }
-                else
-                {
-                    points_joueur_bleu += 1;
-                }
-                map[tab_unites[i].position_y][tab_unites[i].position_x] = 1;
+                points_joueur_rouge += 1;
             }
+            else
+            {
+                points_joueur_bleu += 1;
+            }
+            map[tab_unites[i].position_y][tab_unites[i].position_x] = 1;
         }
     }
 }
@@ -835,6 +895,7 @@ void deplace_unite(Coordonnees depart, int ligne, int colonne)
         }
     }
 }
+
 void creer_unite()
 {
     if (nb_tours % 2 == 1 && !est_unite(taille_map / 2, 2))
@@ -879,6 +940,17 @@ void creer_unite()
     }
 }
 
+bool plus_unite()
+{
+    for (int i = 0; i < nb_unites_max; i++)
+    {
+        if (tab_unites[i].type > 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
 int main(void)
 {
     system("reset");
@@ -915,20 +987,6 @@ int main(void)
                 mineur.deplacement_x = taille_map / 2;
                 mineur.deplacement_y = taille_map - 3;
                 tab_unites[1] = mineur;
-                mineur.type = 1;
-                mineur.equipe = 1;
-                mineur.position_x = taille_map / 2;
-                mineur.position_y = 6;
-                mineur.deplacement_x = taille_map / 2;
-                mineur.deplacement_y = 6;
-                tab_unites[2] = mineur;
-                mineur.type = 1;
-                mineur.equipe = 0;
-                mineur.position_x = taille_map / 2;
-                mineur.position_y = 7;
-                mineur.deplacement_x = taille_map / 2;
-                mineur.deplacement_y = 7;
-                tab_unites[3] = mineur;
 
                 nb_tours = 0;
 
@@ -946,7 +1004,7 @@ int main(void)
                 }
                 convert(map, map_acces, taille_map);
                 chateaux(map, taille_map);
-                events(map, taille_map, 3);
+                events(map, taille_map, nb_events_tours);
 
                 int c;
                 Coordonnees selection;
@@ -969,6 +1027,12 @@ int main(void)
                     {
                         system("reset");
                         printf("Le joueur bleu a gagné la partie !!!\nMerci d'avoir joué!\n");
+                        break;
+                    }
+                    else if (plus_unite())
+                    {
+                        system("reset");
+                        printf("Aucun joueur n'a gagné !!!\nMerci d'avoir joué!\n");
                         break;
                     }
                     switch (c)
@@ -1024,7 +1088,7 @@ int main(void)
 
                     case 't':
                         nb_tours++;
-                        if (nb_tours % 20 == 0)
+                        if (nb_tours % freq_events_tours == 0)
                         {
                             events(map, taille_map, 1);
                         }
