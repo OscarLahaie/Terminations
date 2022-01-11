@@ -668,6 +668,7 @@ int parametres_partie()
     }
     return 0;
 }
+
 bool est_unite(int ligne, int colonne)
 {
     for (int i = 0; i < nb_unites_max; i++)
@@ -682,6 +683,21 @@ bool est_unite(int ligne, int colonne)
     }
     return false;
 }
+int equipe_unite(int ligne, int colonne)
+{
+    for (int i = 0; i < nb_unites_max; i++)
+    {
+        if (tab_unites[i].type >= 0)
+        {
+            if (tab_unites[i].position_x == colonne && tab_unites[i].position_y == ligne)
+            {
+                return tab_unites[i].equipe;
+            }
+        }
+    }
+    return -1;
+}
+
 Unites *get_unite(int ligne, int colonne)
 {
     for (int i = 0; i < nb_unites_max; i++)
@@ -696,6 +712,7 @@ Unites *get_unite(int ligne, int colonne)
     }
     return &(tab_unites[0]);
 }
+
 void actualise_unite(Unites tab_unites[50])
 {
     for (int i = 0; i < nb_unites_max; i++)
@@ -818,6 +835,49 @@ void deplace_unite(Coordonnees depart, int ligne, int colonne)
         }
     }
 }
+void creer_unite()
+{
+    if (nb_tours % 2 == 1 && !est_unite(taille_map / 2, 2))
+    {
+        for (int i = 0; i < nb_unites_max; i++)
+        {
+            if (tab_unites[i].type < 0)
+            {
+                Unites mineur;
+                mineur.type = 1;
+                mineur.equipe = 1;
+                mineur.position_x = taille_map / 2;
+                mineur.position_y = 2;
+                mineur.deplacement_x = taille_map / 2;
+                mineur.deplacement_y = 2;
+                tab_unites[i] = mineur;
+                return;
+            }
+        }
+    }
+    else if (nb_tours % 2 == 0 && !est_unite(taille_map / 2, taille_map - 3))
+    {
+        for (int i = 0; i < nb_unites_max; i++)
+        {
+            if (tab_unites[i].type < 0)
+            {
+                Unites mineur;
+                mineur.type = 1;
+                mineur.equipe = 0;
+                mineur.position_x = taille_map / 2;
+                mineur.position_y = taille_map - 3;
+                mineur.deplacement_x = taille_map / 2;
+                mineur.deplacement_y = taille_map - 3;
+                tab_unites[i] = mineur;
+                return;
+            }
+        }
+    }
+    else
+    {
+        printf("Une unité est déjà présente au spawn !\n\r");
+    }
+}
 
 int main(void)
 {
@@ -899,6 +959,18 @@ int main(void)
                 {
                     int map_tmp[HEIGHT_MAX][WIDTH_MAX] = {{0}};
                     system("clear");
+                    if (points_vie_bleu == 0)
+                    {
+                        system("reset");
+                        printf("Le joueur rouge a gagné la partie !!!\nMerci d'avoir joué!\n");
+                        break;
+                    }
+                    else if (points_vie_rouge == 0)
+                    {
+                        system("reset");
+                        printf("Le joueur bleu a gagné la partie !!!\nMerci d'avoir joué!\n");
+                        break;
+                    }
                     switch (c)
                     {
                     case 'A':
@@ -913,8 +985,24 @@ int main(void)
                     case 'D':
                         selection.x--;
                         break;
+                    case 'b':
+                        if (points_joueur_bleu > 0 && nb_tours % 2 == 1)
+                        {
+                            creer_unite();
+                            points_joueur_bleu--;
+                        }
+                        else if (points_joueur_rouge > 0 && nb_tours % 2 == 0)
+                        {
+                            creer_unite();
+                            points_joueur_rouge--;
+                        }
+                        else
+                        {
+                            printf("Pas assez d'argent pour acheter une unité !\n\r");
+                        }
+                        break;
                     case 'm':
-                        if (est_unite(selection.y, selection.x))
+                        if (equipe_unite(selection.y, selection.x) == nb_tours % 2)
                         {
                             etat_move = true;
                             unit_selection.x = selection.x;
@@ -936,19 +1024,22 @@ int main(void)
 
                     case 't':
                         nb_tours++;
-                        if (nb_tours % 10 == 0)
+                        if (nb_tours % 20 == 0)
                         {
                             events(map, taille_map, 1);
                         }
-                        actualise_unite(tab_unites);
-
+                        if (nb_tours % 2 == 0)
+                        {
+                            actualise_unite(tab_unites);
+                        }
                         break;
                     }
-                    printf("\rNombre de tours : %d | Points joeur bleu : %d | Points joeur rouge : %d\n\r", nb_tours, points_joueur_bleu, points_joueur_rouge);
+                    printf("\rNombre de tours : %d | Points joeur bleu : %d | Points joeur rouge : %d\n\r", nb_tours / 2, points_joueur_bleu, points_joueur_rouge);
                     printf("\rPoints de vie chateau bleu  = %d | Points de vie chateau rouge = %d \n\r", points_vie_bleu, points_vie_rouge);
+                    printf(nb_tours % 2 == 1 ? "C'est le tour du joueur bleu !\n\r" : "C'est le tour du joueur rouge !\n\r");
                     affiche_unite(map_tmp);
                     afficher(map, map_tmp, biome, taille_map, selection, etat_move);
-                    printf("\r q : quitter , m : selectionner uniter, ' ' : selectionner l'endroit, t : passer le tour\n\r");
+                    printf("\r q : quitter , m : selectionner uniter, ' ' : selectionner l'endroit, t : Joueur suivant\n\r");
                 } while ((c = getchar()) != 'q');
                 printf("\r");
                 break;
@@ -967,3 +1058,5 @@ int main(void)
         }
     }
 }
+
+// Bleu = équipe 1 et Rouge = équipe 0
