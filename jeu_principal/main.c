@@ -15,6 +15,10 @@ int taille_map = 25;
 int difficulte = 0;
 int biome = 0;
 int nb_tours = 0;
+int points_joueur_bleu = 0;
+int points_vie_bleu = 50;
+int points_joueur_rouge = 0;
+int points_vie_rouge = 50;
 int map[HEIGHT_MAX][WIDTH_MAX];
 int map_acces[HEIGHT_MAX][WIDTH_MAX];
 #ifndef COORD
@@ -664,13 +668,51 @@ int parametres_partie()
     }
     return 0;
 }
-
+bool est_unite(int ligne, int colonne)
+{
+    for (int i = 0; i < nb_unites_max; i++)
+    {
+        if (tab_unites[i].type >= 0)
+        {
+            if (tab_unites[i].position_x == colonne && tab_unites[i].position_y == ligne)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+Unites *get_unite(int ligne, int colonne)
+{
+    for (int i = 0; i < nb_unites_max; i++)
+    {
+        if (tab_unites[i].type >= 0)
+        {
+            if (tab_unites[i].position_x == ligne && tab_unites[i].position_y == colonne)
+            {
+                return &(tab_unites[i]);
+            }
+        }
+    }
+    return &(tab_unites[0]);
+}
 void actualise_unite(Unites tab_unites[50])
 {
     for (int i = 0; i < nb_unites_max; i++)
     {
         if (tab_unites[i].type >= 0)
         {
+            //attaque chateau
+            if (tab_unites[i].position_x == taille_map / 2 && tab_unites[i].position_y == 2 && tab_unites[i].equipe == 0)
+            {
+                tab_unites[i].type -= 1;
+                points_vie_bleu -= 1;
+            }
+            else if (tab_unites[i].position_x == taille_map / 2 && tab_unites[i].position_y == taille_map - 3 && tab_unites[i].equipe == 1)
+            {
+                tab_unites[i].type -= 1;
+                points_joueur_rouge -= 1;
+            }
             if (tab_unites[i].position_x != tab_unites[i].deplacement_x || tab_unites[i].position_y != tab_unites[i].deplacement_y)
             {
 
@@ -690,11 +732,59 @@ void actualise_unite(Unites tab_unites[50])
                     tab_unites[i].deplacement_x = tab_unites[i].position_x;
                     tab_unites[i].deplacement_y = tab_unites[i].position_y;
                 }
+                else if (est_unite(chemin[1].y, chemin[1].x))
+                {
+                    Unites *point = get_unite(chemin[1].x, chemin[1].y);
+                    if ((*point).equipe == tab_unites[i].equipe && (*point).type == tab_unites[i].type)
+                    {
+                        tab_unites[i].position_x = chemin[1].x;
+                        tab_unites[i].position_y = chemin[1].y;
+                        tab_unites[i].type += 1;
+                        (*point).type = -1;
+                    }
+                    else if ((*point).equipe != tab_unites[i].equipe)
+                    {
+                        if ((*point).type < tab_unites[i].type)
+                        {
+                            tab_unites[i].position_x = (*point).position_x;
+                            tab_unites[i].position_y = (*point).position_y;
+                            tab_unites[i].type = tab_unites[i].type - (*point).type;
+                            (*point).type = -1;
+                        }
+                        else if ((*point).type > tab_unites[i].type)
+                        {
+                            (*point).type = (*point).type - tab_unites[i].type;
+                            tab_unites[i].type = -1;
+                        }
+                        else
+                        {
+                            tab_unites[i].type = -1;
+                            (*point).type = -1;
+                        }
+                    }
+                    else
+                    {
+                        tab_unites[i].deplacement_x = tab_unites[i].position_x;
+                        tab_unites[i].deplacement_y = tab_unites[i].position_y;
+                    }
+                }
                 else
                 {
                     tab_unites[i].position_x = chemin[1].x;
                     tab_unites[i].position_y = chemin[1].y;
                 }
+            }
+            if (map[tab_unites[i].position_y][tab_unites[i].position_x] == 216)
+            {
+                if (tab_unites[i].equipe == 0)
+                {
+                    points_joueur_rouge += 1;
+                }
+                else
+                {
+                    points_joueur_bleu += 1;
+                }
+                map[tab_unites[i].position_y][tab_unites[i].position_x] = 1;
             }
         }
     }
@@ -714,20 +804,6 @@ void affiche_unite(int mapf[HEIGHT_MAX][WIDTH_MAX])
     }
 }
 
-bool est_unite(int ligne, int colonne)
-{
-    for (int i = 0; i < nb_unites_max; i++)
-    {
-        if (tab_unites[i].type >= 0)
-        {
-            if (tab_unites[i].position_x == colonne || tab_unites[i].position_y == ligne)
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
 void deplace_unite(Coordonnees depart, int ligne, int colonne)
 {
     for (int i = 0; i < nb_unites_max; i++)
@@ -779,6 +855,20 @@ int main(void)
                 mineur.deplacement_x = taille_map / 2;
                 mineur.deplacement_y = taille_map - 3;
                 tab_unites[1] = mineur;
+                mineur.type = 1;
+                mineur.equipe = 1;
+                mineur.position_x = taille_map / 2;
+                mineur.position_y = 6;
+                mineur.deplacement_x = taille_map / 2;
+                mineur.deplacement_y = 6;
+                tab_unites[2] = mineur;
+                mineur.type = 1;
+                mineur.equipe = 0;
+                mineur.position_x = taille_map / 2;
+                mineur.position_y = 7;
+                mineur.deplacement_x = taille_map / 2;
+                mineur.deplacement_y = 7;
+                tab_unites[3] = mineur;
 
                 nb_tours = 0;
 
@@ -854,7 +944,8 @@ int main(void)
 
                         break;
                     }
-                    printf("\rNombre de tours : %d\n\r", nb_tours);
+                    printf("\rNombre de tours : %d | Points joeur bleu : %d | Points joeur rouge : %d\n\r", nb_tours, points_joueur_bleu, points_joueur_rouge);
+                    printf("\rPoints de vie chateau bleu  = %d | Points de vie chateau rouge = %d \n\r", points_vie_bleu, points_vie_rouge);
                     affiche_unite(map_tmp);
                     afficher(map, map_tmp, biome, taille_map, selection, etat_move);
                     printf("\r q : quitter , m : selectionner uniter, ' ' : selectionner l'endroit, t : passer le tour\n\r");
