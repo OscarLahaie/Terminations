@@ -372,14 +372,9 @@ bool king_chess(int color) {
 	return false;
 }
 
-void clearscreen() {
-	fflush(stdout);
-	printf("\033[1;1H\033[2J");
-}
-
 // User called exit, cleanup
 void doexit(int err) {
-	clearscreen();
+	erase();
 	system("reset");
 	if (sockfd != 0)
 		close(sockfd);
@@ -527,38 +522,58 @@ void printgrid() {
 void startconnect() {
 	regex_t regex;
 	regcomp(&regex, "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$", 0); // Regex for an IP Address, stolen on S.O.
-	clearscreen();
-	printf("\rEnter an IP address, then press \033[34menter\033[0m to validate\n");
+	erase();
+	mvprintw(0, 0, "Enter an IP address, then press ");
+	attron(COLOR_PAIR(FG_BLUE));
+	printw("enter");
+	attroff(COLOR_PAIR(FG_BLUE));
+	printw(" to validate");
+	refresh();
+	move(1, 0);
 	char* address = malloc(16 * sizeof(char));
-	scanf("%s", address);
+	echo();
+	cbreak();
+	scanw("%s", address);
+	noecho();
 	while (!regexec(&regex, address, 0, NULL, 0)) {
-		clearscreen();
-		printf("\rEnter an IP address, then press \033[34menter\033[0m to validate\n");
-		scanf("%s", address);
+		erase();
+		mvprintw(0, 0, "Enter an IP address, then press ");
+		attron(COLOR_PAIR(FG_BLUE));
+		printw("enter");
+		attroff(COLOR_PAIR(FG_BLUE));
+		printw(" to validate");
+		refresh();
+		move(1, 0);
 	}
 	struct addrinfo hints, *res;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_flags = AI_PASSIVE;
 	getaddrinfo(address, "4050", &hints, &res); // Open a connection at address:4050
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	clearscreen();
-	printf("\rTrying to connect\n");
+	erase();
+	mvprintw(0, 0, "Trying to connect");
 	struct timeval timeout;
 	timeout.tv_sec  = 5;  // Timeout after 5 seconds
 	timeout.tv_usec = 0;
 	setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
 	if (connect(sockfd, res->ai_addr, res->ai_addrlen) == -1) {
-		clearscreen();
-		printf("\r\033[31mFailed to connect to host\033[0m\n");
+		erase();
+		attron(COLOR_PAIR(FG_RED));
+		mvprintw(0, 0, "Failed to connect to host");
+		attroff(COLOR_PAIR(FG_RED));
+		refresh();
 		sleep(2);
 		doexit(1);
 	}
-	clearscreen();
-	printf("\rConnected\nWaiting for server to choose color\n");
+	erase();
+	attron(COLOR_PAIR(FG_GREEN));
+	mvprintw(0, 0, "Connected");
+	attroff(COLOR_PAIR(FG_GREEN));
+	mvprintw(1, 0, "Waiting for server to choose color");
 	// Server chooses a color, returns the other to client
 	int color2;
 	recv(sockfd, &color2, sizeof(int), 0);
-	clearscreen();
+	erase();
 	iswhiteplayer = color2 == WHITES;
 }
 
@@ -575,70 +590,97 @@ void startserver() {
 	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 	bind(new_fd, res->ai_addr, res->ai_addrlen);
 	listen(new_fd, 1);
-	clearscreen();
+	erase();
+	refresh();
 	socklen_t addr_size = sizeof(server);
 	memset(&server, 0, sizeof(server));
-
-	printf("\rWaiting for someone to connect, IP addresses of this pc:\n");
-	system("if command -v ip >/dev/null 2>&1; then list=$(for line in $(ip route show); do echo $line; done | grep -A 2 src | grep 192.168) && for elem in $list; do echo -e \033[32m$elem\033[0m; done; else echo -e \033[31mcommand `ip` not installed\033[0m; fi");
+	mvprintw(0, 0, "Waiting for someone to connect, IP addresses of this pc");
+	move(1, 0);
+	refresh();
+	system("if command -v ip >/dev/null 2>&1; then list=$(for line in $(ip route show); do echo $line; done | grep -A 2 src | grep 192.168) && for elem in $list; do echo -e \r\033[32m$elem\033[0m; done; else echo -e \033[31mcommand `ip` not installed\033[0m; fi");
 	sockfd = accept(new_fd, (struct sockaddr *) &client, &addr_size);
-	clearscreen();
+//	erase();
 	struct hostent *hostName;
 	struct in_addr ipv4addr;
 	inet_pton(AF_INET, inet_ntoa(client.sin_addr), &ipv4addr);
 	hostName = gethostbyaddr(&ipv4addr, sizeof ipv4addr, AF_INET);
-	printf("\rReceived connection from \"%s\", IP address : %s\n", hostName->h_name, inet_ntoa(client.sin_addr));
+	mvprintw(0, 0, "Received connection from ");
+	attron(COLOR_PAIR(FG_GREEN));
+	printw("%s", hostName->h_name);
+	attroff(COLOR_PAIR(FG_GREEN));
+	printw(" with IP address ");
+	attron(COLOR_PAIR(FG_GREEN));
+	printw("%s", inet_ntoa(client.sin_addr));
+	attroff(COLOR_PAIR(FG_GREEN));
+	system("clear");
+	printf("\033[1;1H\033[2J");
+	refresh();
+	erase();
+	refresh();
 	// Server chooses a color
-	printf("What color would you like to play ? Use \033[32marrow keys\033[0m to move and press \033[34mspace\033[0m to validate\n");
+	mvprintw(0, 0, "What color would you like to play ? Use ");
+	attron(COLOR_PAIR(FG_GREEN));
+	printw("arrow keys");
+	attroff(COLOR_PAIR(FG_GREEN));
+	printw(" to move and press ");
+	attron(COLOR_PAIR(FG_BLUE));
+	printw("menter");
+	attroff(COLOR_PAIR(FG_BLUE));
+	printw(" to validate");
 	char* c1 = "Play as white";
 	char* c2 = "Play as black";
 	char* list[2] = {c1, c2};
-	int bgcolor = 0;
-	int fgcolor = 0;
+	int color = 0;
 	int player_pos = 0;
 	for (int i = 0; i < 2; i++) {
 		if (player_pos == i) {
-			bgcolor = 30;
-			fgcolor = BG_RED;
+			color = FG_RED;
 		} else {
-			bgcolor = BG_WHITE;
-			fgcolor = 35;
+			color = FG_WHITE;
 		}
-		printf("\r\033[%d;%dm%s\033[0m\n", fgcolor, bgcolor, list[i]);
+		attron(COLOR_PAIR(color));
+		mvprintw(i + 1, 0, list[i]);
+		attroff(COLOR_PAIR(color));
 	}
-	printf("\r");
-	system("/usr/bin/stty raw");
 	int c;
-	while ((c = getchar()) != ' ') {
+	bool done = false;
+	cbreak();
+	keypad(stdscr, TRUE);
+	while (!done) {
+		c = getch();
 		printf("\033[2K\033[A\033[2K\033[A");
 		switch(c) {
+			case KEY_DOWN:
 			case 'B':
 				if (player_pos != 1)
 					player_pos++;
 				break;
+			case KEY_UP:
 			case 'A':
 				if (player_pos != 0)
 					player_pos--;
 				break;
+			case KEY_ENTER:
+			case '\n':
+				done = true;
+				break;
 			default:
 				break;
 		}
-		printf("\033[2K");
 		for (int i = 0; i < 2; i++) {
 			if (player_pos == i) {
-				bgcolor = 30;
-				fgcolor = BG_RED;
+				color = FG_RED;
 			} else {
-				bgcolor = BG_WHITE;
-				fgcolor = 35;
+				color = FG_WHITE;
 			}
-			printf("\r\033[%d;%dm%s\n\033[0m", fgcolor, bgcolor, list[i]);
+			attron(COLOR_PAIR(color));
+			mvprintw(i + 1, 0, list[i]);
+			attroff(COLOR_PAIR(color));
 		}
-		printf("\r");
 	}
-	clearscreen();
-	system("/usr/bin/stty cooked");
+	erase();
 	int sendblack2;
+	iswhiteplayer = 1 - player_pos;
 	switch(player_pos) {
 		case 0:
 			sendblack2 = 0;
@@ -651,60 +693,72 @@ void startserver() {
 	}
 	// Send to client the other color
 	send(sockfd, &sendblack2, sizeof(int), 0);
-	clearscreen();
+	erase();
 }
 
 // We are playing in LAN mode, user has to choose to be server or client (doesn't change much in game)
 void startaskserver() {
-	clearscreen();
+	erase();
 	int player_pos = 0;
-	printf("Who will be hosting the game ? Use \033[32marrow keys\033[0m to move and press \033[34mspace\033[0m to validate\n");
+	mvprintw(0, 0, "Who will be hosting the game ? Use ");
+	attron(COLOR_PAIR(FG_GREEN));
+	printw("arrow keys");
+	attroff(COLOR_PAIR(FG_GREEN));
+	printw(" to move and press ");
+	attron(COLOR_PAIR(FG_BLUE));
+	printw("enter");
+	attroff(COLOR_PAIR(FG_BLUE));
+	printw(" to validate");
 	char* c1 = "Host the game";
 	char* c2 = "Connect to a host";
 	char* list[2] = {c1, c2};
-	int bgcolor = 0;
-	int fgcolor = 0;
+	int color = 0;
 	for (int i = 0; i < 2; i++) {
 		if (player_pos == i) {
-			bgcolor = 30;
-			fgcolor = BG_RED;
+			color = FG_RED;
 		} else {
-			bgcolor = BG_WHITE;
-			fgcolor = 35;
+			color = FG_WHITE;
 		}
-		printf("\r\033[%d;%dm%s\033[0m\n", fgcolor, bgcolor, list[i]);
+		attron(COLOR_PAIR(color));
+		mvprintw(i + 1, 0, list[i]);
+		attroff(COLOR_PAIR(color));
 	}
-	printf("\r");
-	system("/usr/bin/stty raw");
 	int c;
-	while ((c = getchar()) != ' ') {
+	bool done = false;
+	cbreak();
+	keypad(stdscr, TRUE);
+	while (!done) {
+		c = getch();
 		printf("\033[2K\033[A\033[2K\033[A");
 		switch(c) {
+			case KEY_DOWN:
 			case 'B':
 				if (player_pos != 1)
 					player_pos++;
 				break;
+			case KEY_UP:
 			case 'A':
 				if (player_pos != 0)
 					player_pos--;
 				break;
+			case KEY_ENTER:
+			case '\n':
+				done = true;
+				break;
 			default:
 				break;
 		}
-		printf("\033[2K");
 		for (int i = 0; i < 2; i++) {
 			if (player_pos == i) {
-				bgcolor = 30;
-				fgcolor = BG_RED;
+				color = FG_RED;
 			} else {
-				bgcolor = BG_WHITE;
-				fgcolor = 35;
+				color = FG_WHITE;
 			}
-			printf("\r\033[%d;%dm%s\n\033[0m", fgcolor, bgcolor, list[i]);
+			attron(COLOR_PAIR(color));
+			mvprintw(i + 1, 0, list[i]);
+			attroff(COLOR_PAIR(color));
 		}
-		printf("\r");
 	}
-	system("/usr/bin/stty cooked");
 	switch(player_pos) {
 		case 1:
 			startconnect();
@@ -722,21 +776,42 @@ void startaskserver() {
 void printhelp() {
 	isinmenu = true;
 	erase();
-	printw("\rThis game is a pretty normal chess game\n");
-	printw("\rYou can move your pieces with two different methods :\n");
-	printw("\r - \033[32mCursor mode :\033[0m\n");
-	printw("\r   Move the cursor with the \033[34marrows\033[0m of your keyboard\n");
-	printw("\r   Select a piece and validate its move with \033[33mspacebar\033[0m\n");
-	printw("\r   You can cancel a move by selecting the same piece you selected before");
-	printw("\r - \033[32mDirect mode :\033[0m\n");
-	printw("\r   Note the coordinates of the piece you want to move and where to move it\n");
-	printw("\r   Write them with the format [Initial column][Initial line][Final column][Final line] without the brackets\n");
-	printw("\r   Validate your input with \033[33menter\033[0m\n");
-	printw("\rMeta : this game supports\n");
-	printw("\r - The castling :\n");
-	printw("\r   You can select the king to move to the rook\n");
-	printw("\r - En passant\n");
-	printw("\rPress \033[33mESC\033[0m to exit this help\n");
+	mvprintw(0, 0, "This game is a pretty normal chess game");
+	mvprintw(1, 0, "You can move your pieces with two different methods :");
+	mvprintw(2, 0, " - ");
+	attron(COLOR_PAIR(FG_YELLOW));
+	printw("Cursor mode");
+	attroff(COLOR_PAIR(FG_YELLOW));
+	printw(" :");
+	mvprintw(3, 0,"   Move the cursor with the ");
+	attron(COLOR_PAIR(FG_GREEN));
+	printw("arrows");
+	attroff(COLOR_PAIR(FG_GREEN));
+	printw(" of your keyboard");
+	mvprintw(4, 0, "   Select a piece and validate its move with ");
+	attron(COLOR_PAIR(FG_BLUE));
+	printw("spacebar");
+	attroff(COLOR_PAIR(FG_BLUE));
+	mvprintw(5, 0, "   You can cancel a move by selecting the same piece you selected before");
+	mvprintw(6, 0, " - ");
+	attron(COLOR_PAIR(FG_YELLOW));
+	printw("Direct mode");
+	attroff(COLOR_PAIR(FG_YELLOW));
+	printw(":");
+	mvprintw(7, 0, "   Note the coordinates of the piece you want to move and where to move it");
+	mvprintw(8, 0, "   Write them with the format [Initial column][Initial line][Final column][Final line] without the brackets");
+	mvprintw(9, 0, "   Validate your input with ");
+	attron(COLOR_PAIR(FG_BLUE));
+	printw("enter");
+	attroff(COLOR_PAIR(FG_BLUE));
+	mvprintw(10, 0, "Meta : this game supports");
+	mvprintw(11, 0, " - The castling");
+	mvprintw(12, 0, " - En passant");
+	mvprintw(13, 0, "Press ");
+	attron(COLOR_PAIR(FG_BLUE));
+	printw("ESC");
+	attroff(COLOR_PAIR(FG_BLUE));
+	printw(" to exit this help");
 	refresh();
 	int c;
 	while ((c = getch()) != 27) {}
@@ -783,13 +858,13 @@ void waitforevent() {
 		skipturn = false;
 		if (sockfd != 0 && !iswhiteplayer && firstmove == 0) {
 			// If we are not white player and in lan, wait for the other player to start
-			wprintw(input, "Waiting for other player");
+			mvwprintw(input, 1, 1, "Waiting for other player");
 			wrefresh(input);
 			char* otherguymove = malloc(4 * sizeof(char));
 			recv(sockfd, otherguymove, 4, 0);
 			if (strcmp(otherguymove, "QUIT") == 0) { // The other player quit, exit now
-				clearscreen();
-				printf("\rOther player has left\n");
+				erase();
+				mvprintw(0, 0, "\rOther player has left\n");
 				sleep(2);
 				doexit(0);
 			}
@@ -940,8 +1015,11 @@ void waitforevent() {
 					int color = iswhiteplayer ? BLACKS : WHITES;
 					if (belongs(grid[next[0]][next[1]], color)) {
 						if (strcmp(grid[next[0]][next[1]], pieces[color][KING]) == 0) {
-							clearscreen();
-							printf("\033[32mYou win\033[32m\n");
+							//clearscreen();
+							erase();
+							attron(COLOR_PAIR(FG_GREEN));
+							mvprintw(0, 0, "You win");
+							attroff(COLOR_PAIR(FG_GREEN));
 							char win[4] = "LOST";
 							send(sockfd, win, 4, 0);
 							sleep(2);
@@ -997,16 +1075,33 @@ void waitforevent() {
 						grid[prev[0]][prev[1]] = malloc(strlen(" "));
 						strcpy(grid[prev[0]][prev[1]], " ");
 					}
-					if (strcmp(grid[next[0]][next[1]], pieces[1 - color][PAWN]) == 0 && next[0] == (iswhiteplayer ? 7 : 0)) {
-						printf("\rPromoted, you can change your pawn to something else :\n");
-						printf("\r1) Queen\n");
-						printf("\r2) Rook\n");
-						printf("\r3) Bishop\n");
-						printf("\r4) Knight\n");
-						printf("\r > ");
-						scanf("%d", &promotedpiece);
-						while (promotedpiece < 1 || promotedpiece > 4) {
-							scanf("%d", &promotedpiece);
+					if (strcmp(grid[next[0]][next[1]], pieces[1 - color][PAWN]) == 0 && next[0] == (iswhiteplayer ? 7 : 0)) { // Promotion
+						werase(input);
+						box(input, 0, 0);
+						mvwprintw(input, 0, 1, "Input");
+						wrefresh(input);
+						mvwprintw(input, 1, 1, "Promoted, you can change your pawn to something else : 1 = Queen, 2 = Rook, 3 = Bishop, 4 = Knight");
+						mvwprintw(input, 2, 1, "Enter your choice here [1-4] > ");
+						int promotedpiece = 0;
+						while (promotedpiece == 0) {
+							int c = wgetch(input);
+							switch(c) {
+								case '1':
+									promotedpiece = 1;
+									break;
+								case '2':
+									promotedpiece = 2;
+									break;
+								case '3':
+									promotedpiece = 3;
+									break;
+								case '4':
+									promotedpiece = 4;
+									break;
+								default:
+									promotedpiece = 0;
+									break;
+							}
 						}
 						grid[cursor_pos_y][cursor_pos_x] = malloc(strlen(pieces[1 - color][promotedpiece]));
 						strcpy(grid[cursor_pos_y][cursor_pos_x], pieces[1 - color][promotedpiece]);
@@ -1121,8 +1216,11 @@ void waitforevent() {
 								int color = iswhiteplayer ? BLACKS : WHITES;
 								if (belongs(grid[cursor_pos_y][cursor_pos_x], color)) {
 									if (strcmp(grid[cursor_pos_y][cursor_pos_x], pieces[color][KING]) == 0) {
-										clearscreen();
-										printf("\033[32mYou win\033[32m\n");
+										//clearscreen();
+										erase();
+										attron(COLOR_PAIR(FG_GREEN));
+										mvprintw(0, 0, "You win");
+										attroff(COLOR_PAIR(FG_GREEN));
 										char win[4] = "LOST";
 										send(sockfd, win, 4, 0);
 										sleep(2);
@@ -1171,16 +1269,33 @@ void waitforevent() {
 									grid[currentpiece[0]][currentpiece[1]] = malloc(strlen(" "));
 									strcpy(grid[currentpiece[0]][currentpiece[1]], " ");
 								}
-								if (strcmp(grid[cursor_pos_y][cursor_pos_x], pieces[1 - color][PAWN]) == 0 && cursor_pos_y == (iswhiteplayer ? 7 : 0)) {
-									printf("\rPromoted, you can change your pawn to something else :\n");
-									printf("\r1) Queen\n");
-									printf("\r2) Rook\n");
-									printf("\r3) Bishop\n");
-									printf("\r4) Knight\n");
-									printf("\r > ");
-									scanf("%d", &promotedpiece);
-									while (promotedpiece < 1 || promotedpiece > 4) {
-										scanf("%d", &promotedpiece);
+								if (strcmp(grid[cursor_pos_y][cursor_pos_x], pieces[1 - color][PAWN]) == 0 && cursor_pos_y == (iswhiteplayer ? 7 : 0)) { // Promotion
+									werase(input);
+									box(input, 0, 0);
+									mvwprintw(input, 0, 1, "Input");
+									wrefresh(input);
+									mvwprintw(input, 1, 1, "Promoted, you can change your pawn to something else : 1 = Queen, 2 = Rook, 3 = Bishop, 4 = Knight");
+									mvwprintw(input, 2, 1, "Enter your choice here [1-4] > ");
+									int promotedpiece = 0;
+									while (promotedpiece == 0) {
+										int c = wgetch(input);
+										switch(c) {
+											case '1':
+												promotedpiece = 1;
+												break;
+											case '2':
+												promotedpiece = 2;
+												break;
+											case '3':
+												promotedpiece = 3;
+												break;
+											case '4':
+												promotedpiece = 4;
+												break;
+											default:
+												promotedpiece = 0;
+												break;
+										}
 									}
 									grid[cursor_pos_y][cursor_pos_x] = malloc(strlen(pieces[1 - color][promotedpiece]));
 									strcpy(grid[cursor_pos_y][cursor_pos_x], pieces[1 - color][promotedpiece]);
@@ -1260,13 +1375,15 @@ void waitforevent() {
 			char* otherguymove = malloc(4 * sizeof(char));
 			recv(sockfd, otherguymove, 4, 0);
 			if (strcmp(otherguymove, "QUIT") == 0) { // The other player quit, exit now
-				clearscreen();
-				printf("\rOther player has left\n");
+				erase();
+				mvprintw(0, 0, "Other player has left");
 				sleep(2);
 				doexit(0);
 			} else if (strcmp(otherguymove, "LOST") == 0) {
-				clearscreen();
-				printf("\033[31mYou lost\033[0m\n");
+				erase();
+				attron(COLOR_PAIR(FG_RED));
+				printf("You lost");
+				attroff(COLOR_PAIR(FG_RED));
 				sleep(2);
 				doexit(0);
 			}
@@ -1407,7 +1524,7 @@ void tutorial(int argc, char* argv[]) {
 	char* msg0 = "Up here is the status bar, it shows you the time spent in the game";
 	mvprintw(4, 0, msg0);
 	refresh();
-	getchar();
+	getch();
 	for (int i = 0; i < strlen(msg0); i++) {
 		refresh();
 		mvprintw(4, i, " ");
@@ -1416,21 +1533,21 @@ void tutorial(int argc, char* argv[]) {
 	char* msg1 = "Down is the main playing area, this is where the game happens";
 	mvprintw(mid_h - 12, mid_w - strlen(msg1) / 2, msg1);
 	refresh();
-	getchar();
+	getch();
 	for (int i = 0; i < strlen(msg1); i++) {
 		mvprintw(mid_h - 12, mid_w - strlen(msg1) / 2 + i, " ");
 	}
 	char* msg2 = "This is the input area, where you will enter the move you want to play";
 	mvprintw(lcount - 5, 0, msg2);
 	refresh();
-	getchar();
+	getch();
 	for (int i = 0; i < strlen(msg2); i++) {
 		mvprintw(lcount - 5, i, " ");
 	}
 	char* msg3 = "This is the history bar, it will show you the history of moves";
 	mvprintw(4, ccount - 20 - strlen(msg3), msg3);
 	refresh();
-	getchar();
+	getch();
 	for (int i = 0; i < strlen(msg3); i++) {
 		mvprintw(4, ccount - 20 - strlen(msg3) + i, " ");
 	}
@@ -1443,7 +1560,7 @@ void tutorial(int argc, char* argv[]) {
 	mvprintw(0, 0, msg4);
 	mvprintw(1, 0, "Your objective is to eat the king of the opposite color");
 	refresh();
-	getchar();
+	getch();
 	erase();
 	refresh();
 	printgrid();
@@ -1457,7 +1574,7 @@ void tutorial(int argc, char* argv[]) {
 	mvprintw(5, 0, "- The queen (D1, D8) can move vertically and/or horizontally any number of cases but cannot go past another piece");
 	mvprintw(6, 0, "- The king (E1, E8) can move 1 case around him");
 	refresh();
-	getchar();
+	getch();
 	erase();
 	refresh();
 	printgrid();
@@ -1474,12 +1591,11 @@ void tutorial(int argc, char* argv[]) {
 	mvprintw(8, 0, "- If your pawn reaches the last line of the board,");
 	mvprintw(9, 0, "Then you can change it for whatever other piece you want");
 	refresh();
-	getchar();
+	getch();
 	erase();
 	mvprintw(0, 0, "Now that you know everything, good luck");
 	refresh();
-	getchar();
-	clearscreen();
+	getch();
 	erase();
 	// Relaunch the game when finished
 	char* args[] = {argv[0], NULL};
@@ -1492,7 +1608,7 @@ void start(int mode, int argc, char* argv[]) {
 		case 2:
 			gamemode = 2; // This is the tutorial
 			tutorial(argc, argv);
-			clearscreen();
+			erase();
 			doexit(0);
 			break;
 		case 0:
@@ -1521,92 +1637,120 @@ void start(int mode, int argc, char* argv[]) {
 
 // User chooses the playing mode
 int menu() {
-	clearscreen();
+	erase();
 	int player_pos = 0;
-	printf("How would you like to play ? Use \033[32marrow keys\033[0m to move and press \033[34mspace\033[0m to validate\n");
+	mvprintw(0, 0, "How would you like to play ? Use ");
+	attron(COLOR_PAIR(FG_GREEN));
+	printw("arrow keys");
+	attroff(COLOR_PAIR(FG_GREEN));
+	printw(" to move and press ");
+	attron(COLOR_PAIR(FG_BLUE));
+	printw("enter");
+	attroff(COLOR_PAIR(FG_BLUE));
+	printw(" to validate");
 	char* c1 = "Play with a friend (on this machine)";
 	char* c2 = "Play with a friend (over the network)";
 	char* c3 = "Learn how to play";
 	char* list[3] = {c1, c2, c3};
-	int bgcolor = 0;
-	int fgcolor = 0;
+	int color = 0;
 	for (int i = 0; i < 3; i++) {
 		if (player_pos == i) {
-			bgcolor = 30;
-			fgcolor = BG_RED;
+			color = FG_RED;
 		} else {
-			bgcolor = BG_WHITE;
-			fgcolor = 35;
+			color = FG_WHITE;
 		}
-		printf("\r\033[%d;%dm%s\033[0m\n", fgcolor, bgcolor, list[i]);
+		attron(COLOR_PAIR(color));
+		mvprintw(i + 1, 0, "%s", list[i]);
+		attroff(COLOR_PAIR(color));
 	}
-	printf("\r");
-	system("/usr/bin/stty raw");
 	int c;
-	while ((c = getchar()) != ' ') {
+	bool done = false;
+	cbreak();
+	while (!done) {
+		c = getch();
 		printf("\033[2K\033[A\033[2K\033[A\033[2K\033[A");
 		switch(c) {
+			case KEY_DOWN:
 			case 'B':
 				if (player_pos != 2)
 					player_pos++;
 				break;
+			case KEY_UP:
 			case 'A':
 				if (player_pos != 0)
 					player_pos--;
+				break;
+			case KEY_ENTER:
+			case '\n':
+				done = true;
 				break;
 			default:
 				break;
 		}
 		printf("\033[2K");
+		int color;
 		for (int i = 0; i < 3; i++) {
 			if (player_pos == i) {
-				bgcolor = 30;
-				fgcolor = BG_RED;
+				color = FG_RED;
 			} else {
-				bgcolor = BG_WHITE;
-				fgcolor = 35;
+				color = FG_WHITE;
 			}
-			printf("\r\033[%d;%dm%s\n\033[0m", fgcolor, bgcolor, list[i]);
+			attron(COLOR_PAIR(color));
+			mvprintw(i + 1, 0, "%s", list[i]);
+			attroff(COLOR_PAIR(color));
 		}
-		printf("\r");
 	}
-	system("/usr/bin/stty cooked");
 	return player_pos;
 }
 
 // User chooses the input mode
 void select_playing_mode(int argc, char* argv[]) {
-	clearscreen();
+	erase();
 	int player_pos = 0;
-	printf("How would you like to control your inputs ? Use \033[32marrow keys\033[0m to move and press \033[34mspace\033[0m to validate\n");
+	mvprintw(0, 0, "How would you like to control your inputs ? Use ");
+	attron(COLOR_PAIR(FG_GREEN));
+	printw("arrow keys");
+	attroff(COLOR_PAIR(FG_GREEN));
+	printw(" to move and press ");
+	attron(COLOR_PAIR(FG_BLUE));
+	printw("enter");
+	attroff(COLOR_PAIR(FG_BLUE));
+	printw(" to validate");
 	char* c1 = "Play with arrow keys";
 	char* c2 = "Enter B1C3 style moves";
 	char* list[2] = {c1, c2};
-	int bgcolor = 0;
-	int fgcolor = 0;
+	int color = 0;
 	for (int i = 0; i < 2; i++) {
 		if (player_pos == i) {
-			bgcolor = 30;
-			fgcolor = BG_RED;
+			color = FG_RED;
 		} else {
-			bgcolor = BG_WHITE;
-			fgcolor = 35;
+			color = FG_WHITE;
 		}
-		printf("\r\033[%d;%dm%s\033[0m\n", fgcolor, bgcolor, list[i]);
+		attron(COLOR_PAIR(color));
+		mvprintw(i + 1, 0, list[i]);
+		attroff(COLOR_PAIR(color));
 	}
-	printf("\r");
-	system("/usr/bin/stty raw");
 	int c;
-	while ((c = getchar()) != ' ') {
+	bool done = false;
+	cbreak();
+	keypad(stdscr, TRUE);
+	while (!done) {
+		c = getch();
 		printf("\033[2K\033[A\033[2K\033[A");
 		switch(c) {
+			case KEY_DOWN:
 			case 'B':
 				if (player_pos != 1)
 					player_pos++;
 				break;
+			case KEY_UP:
 			case 'A':
 				if (player_pos != 0)
 					player_pos--;
+				break;
+			case KEY_ENTER:
+			case '\n':
+				done = true;
 				break;
 			default:
 				break;
@@ -1614,17 +1758,15 @@ void select_playing_mode(int argc, char* argv[]) {
 		printf("\033[2K");
 		for (int i = 0; i < 2; i++) {
 			if (player_pos == i) {
-				bgcolor = 30;
-				fgcolor = BG_RED;
+				color = FG_RED;
 			} else {
-				bgcolor = BG_WHITE;
-				fgcolor = 35;
+				color = FG_WHITE;
 			}
-			printf("\r\033[%d;%dm%s\n\033[0m", fgcolor, bgcolor, list[i]);
+			attron(COLOR_PAIR(color));
+			mvprintw(i + 1, 0, list[i]);
+			attroff(COLOR_PAIR(color));
 		}
-		printf("\r");
 	}
-	system("/usr/bin/stty cooked");
 	keyboardmode = 1 - player_pos;
 	// Do not show cursor position on B1C3 style input
 	if (keyboardmode == LETTERSMODE) {
@@ -1648,24 +1790,8 @@ int main (int argc, char* argv[]) {
 		{pieces[BLACKS][ROOK], pieces[BLACKS][KNIGHT], pieces[BLACKS][BISHOP], pieces[BLACKS][QUEEN], pieces[BLACKS][KING], pieces[BLACKS][BISHOP], pieces[BLACKS][KNIGHT], pieces[BLACKS][ROOK]},
 	};
 	memcpy(&grid, &grid2, sizeof(grid));
-	clearscreen();
+	erase();
 
-	printf("\rThis game is best played with a big font, you should resize your terminal font with \033[32mCtrl+Shift++\033[0m\n\rPress any key when you are ready\n");
-	getchar();
-
-	// Get the size of the terminal
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	lcount = w.ws_row;
-	ccount = w.ws_col;
-	char* move_str = "    ";
-	history = malloc((lcount - 6) * sizeof(move_str));
-	for (int i = 0; i < lcount - 6; i++) {
-		history[i] = malloc(4 * sizeof(char));
-		strcpy(history[i], move_str);
-	}
-	mid_h = (lcount % 2 == 0 ? lcount / 2 : (lcount + 1) / 2);
-	mid_w = (ccount % 2 == 0 ? ccount / 2 : (ccount + 1) / 2);
 	initscr();
 	// Allow the use of arrow keys
 	keypad(stdscr, TRUE);
@@ -1683,6 +1809,27 @@ int main (int argc, char* argv[]) {
 	init_pair(FG_GREEN, COLOR_GREEN, COLOR_BLACK);
 	init_pair(FG_YELLOW, COLOR_YELLOW, COLOR_BLACK);
 	init_pair(FG_WHITE, COLOR_WHITE, COLOR_BLACK);
+	mvprintw(0, 0, "This game is best played with a big font, you should resize your terminal font with ");
+	attron(COLOR_PAIR(FG_GREEN));
+	printw("Ctrl+Shift++");
+	attroff(COLOR_PAIR(FG_GREEN));
+	printw(" if your terminal supports it");
+	mvprintw(1, 0, "Press any key when you are ready");
+	getch();
+
+	// Get the size of the terminal
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	lcount = w.ws_row;
+	ccount = w.ws_col;
+	char* move_str = "    ";
+	history = malloc((lcount - 6) * sizeof(move_str));
+	for (int i = 0; i < lcount - 6; i++) {
+		history[i] = malloc(4 * sizeof(char));
+		strcpy(history[i], move_str);
+	}
+	mid_h = (lcount % 2 == 0 ? lcount / 2 : (lcount + 1) / 2);
+	mid_w = (ccount % 2 == 0 ? ccount / 2 : (ccount + 1) / 2);
 	// Define the game HUD
 	status = newwin(4, ccount, 0, 0);
 	game = newwin(12, 12, mid_h - 6, mid_w - 6);
